@@ -55,10 +55,10 @@ import project_sanwa_new.StateCheck;
  * @author yotsathon
  */
 public class Main extends javax.swing.JFrame {
-
     /**
      * Creates new form Main
      */
+    static ViewTable va;
     static ViewTable viewTable;
     static ViewTable1 viewTable1;
     static Home home;
