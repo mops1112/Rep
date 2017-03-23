@@ -1,47 +1,26 @@
 
-import java.awt.AWTEventMulticaster;
-import java.awt.BorderLayout;
 import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.FlowLayout;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javafx.scene.control.ProgressBar;
-import javax.swing.BorderFactory;
-import javax.swing.JComboBox;
-import javax.swing.JDesktopPane;
-import javax.swing.JDialog;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JProgressBar;
-import javax.swing.UIManager;
-import javax.swing.border.Border;
-import javax.swing.table.DefaultTableModel;
-import jdk.nashorn.internal.codegen.CompilerConstants;
 import org.json.JSONArray;
-import org.json.JSONObject;
-import org.netbeans.lib.awtextra.AbsoluteLayout;
 import project_sanwa_new.Alert;
 import project_sanwa_new.DBDetail;
 import project_sanwa_new.DBRoom;
 import project_sanwa_new.DataAlert;
 import project_sanwa_new.Database;
 import project_sanwa_new.ListAlert;
-import project_sanwa_new.Room;
 import project_sanwa_new.Sanwa;
 import project_sanwa_new.StateCheck;
 
@@ -107,8 +86,8 @@ public class Main extends javax.swing.JFrame {
 
         menu.add(progressBar);
 
-        add(menu, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 100, 768));
-        add(content, new org.netbeans.lib.awtextra.AbsoluteConstraints(100, 0, 945, 768));
+        add(menu); //0, 0, 100, 768
+        add(content); //100, 0, 945, 768
 
         importData = new ImportData();
 
@@ -130,7 +109,7 @@ public class Main extends javax.swing.JFrame {
         setMaximumSize(new java.awt.Dimension(1024, 768));
         setMinimumSize(new java.awt.Dimension(1024, 768));
         setResizable(false);
-        getContentPane().setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
+        getContentPane().setLayout(new java.awt.FlowLayout());
 
         pack();
         setLocationRelativeTo(null);
