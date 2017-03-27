@@ -4,6 +4,7 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
+import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.sql.ResultSet;
@@ -12,6 +13,7 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.AbstractAction;
+import javax.swing.DefaultComboBoxModel;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
@@ -26,10 +28,15 @@ import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
 import org.jfree.ui.RefineryUtilities;
+import project_sanwa_new.Area;
 import project_sanwa_new.DBDetail;
+import project_sanwa_new.DBDragoConnex;
 import project_sanwa_new.DBRoom;
+import project_sanwa_new.DragoConnex;
+import project_sanwa_new.Floor;
 import project_sanwa_new.LineChart;
 import project_sanwa_new.Sanwa;
+import project_sanwa_new.SelectComboBox;
 
 /*
  * To change this license header, choose License Headers in Project Properties.
@@ -40,18 +47,37 @@ import project_sanwa_new.Sanwa;
  *
  * @author yotsathon
  */
-public class ViewTable extends javax.swing.JPanel implements ActionListener {
+public class ViewTable extends javax.swing.JPanel implements ActionListener{
 
     /**
      * Creates new form ViewTable
      */
     static Map<String, String> startDateTime;
-    private static JLabel dateTime;
-    private static JTable table;
+    private JLabel dateTime;
+    private JTable table;
     private JButton updateButton;
-    JComboBox siteList;
-    JComboBox areaList;
-    JComboBox dragoConnexList;
+
+    //JComboBox areaCombo;
+    private FloorCombo floorCombo;
+    private AreaCombo areaCombo;
+    private DragoConnexCombo dragoConnexCombo;
+
+    public void setTable(DefaultTableModel model) {
+        this.table.setModel(model);
+    }
+
+    public void setAreaCombo(DefaultComboBoxModel<Area> AreaModel) {
+        this.areaCombo.setModel(AreaModel);
+    
+    }
+
+    public void setFloorCombo(DefaultComboBoxModel<Floor> FloorModel) {
+        this.floorCombo.setModel(FloorModel);
+    }
+
+    public void setDragoConnexCombo(DefaultComboBoxModel<DragoConnex> dragoConnexModel) {
+       this.dragoConnexCombo.setModel(dragoConnexModel);
+    }
 
     public ViewTable() {
         initComponents();
@@ -67,12 +93,23 @@ public class ViewTable extends javax.swing.JPanel implements ActionListener {
             public Component prepareRenderer(TableCellRenderer renderer, int rowIndex, int vColIndex) {
                 Component c = super.prepareRenderer(renderer, rowIndex, vColIndex);
                 if (rowIndex % 2 == 0 && !isCellSelected(rowIndex, vColIndex)) {
-                    c.setBackground(new Color(107, 184, 245));
+                    c.setBackground(new Color(243,242,243));
                 } else if (isCellSelected(rowIndex, vColIndex)) {
-                    c.setBackground(new Color(0, 176, 255));
+                    c.setBackground(new Color(174,209,241));
+                    c.setForeground(new Color(0,0,0));
                 } else {
-                    c.setBackground(getBackground());
+                        //c.setBackground(getBackground());
+                     c.setBackground(new Color(255,255,255));
                 }
+                
+                float wFw = Float.valueOf((table.getValueAt(rowIndex,3)).toString());
+                float limit = Float.valueOf((table.getValueAt(rowIndex,4)).toString());
+                if(wFw > limit) {
+                     c.setBackground(new Color(244,196,55));
+                     
+                } 
+                    
+                
                 return c;
             }
 
@@ -80,34 +117,52 @@ public class ViewTable extends javax.swing.JPanel implements ActionListener {
         // table.setFont(new Font("times new roman", Font.PLAIN, 14));
         table.setPreferredScrollableViewportSize(new Dimension(800, 600));
         table.setFillsViewportHeight(true);
+        table.setFont(new Font("Century Gothic",0, 12));
         JScrollPane scrollPane = new JScrollPane(table);
+        //loadData();
+        SelectComboBox selectComboBox = new SelectComboBox();
+        areaCombo = new AreaCombo();
+        areaCombo.addActionListener(this);
+        dragoConnexCombo = new DragoConnexCombo();
+        dragoConnexCombo.addActionListener(this);
+        floorCombo = new FloorCombo();
+
         JPanel group = new JPanel(new FlowLayout(FlowLayout.RIGHT, 3, 3));
         group.setOpaque(false);
+        group.add(areaCombo);
+        group.add(dragoConnexCombo);
+        group.add(floorCombo);
         group.add(dateTime);
         group.add(updateButton);
         add(group, BorderLayout.PAGE_START);
-        //add(updateButton, BorderLayout.PAGE_START);
         add(scrollPane, BorderLayout.CENTER);
         setVisible(true);
 
-        loadData();
-        //alertMessage();
+        
+       
 
     }
 
-    public static void loadData() {
+    private void loadData() {
         DBRoom dbR = new DBRoom();
         DBDetail dbD = new DBDetail();
         dbR.connect();
         dbD.connect();
-        String columnNames[] = {"Site", "Area", "DragoConnex", "RoomNumber","Floor", "Water Flow (wFw)", "HighTreshold"};
+        String columnNames[] = {"Status","RoomNumber", "Floor", "Water Flow (wFw)", "HighTreshold"};
         DefaultTableModel model = new DefaultTableModel(new Object[0][0], columnNames);
         Sanwa sw = new Sanwa();
         startDateTime = sw.getCurentDateTime();
         try {
-            ResultSet rs = dbD.selectAllWaterByDateTime(startDateTime.get("dateTimeLocal"));
-            while (rs.next()) {
-                Object[] obj = {rs.getString("siteName"), rs.getString("areaName"), rs.getString("dragoConnexName"), rs.getString("roomNumber"),rs.getString("floor"), rs.getString("wFw"), rs.getString("w_limit")};
+            ResultSet rs = dbD.selectAllWaterByDateTimeSiteIDAreaIDDragoConnexIDFloor(startDateTime.get("dateTimeLocal"),SelectComboBox.getSiteID(),SelectComboBox.getAreaID(),SelectComboBox.getDragoConnexID(),SelectComboBox.getFloorNumber());
+             
+             while (rs.next()) {
+                String status = "Normal";
+                float wFw = Float.valueOf(rs.getString("wFw"));
+                float limit = Float.valueOf(rs.getString("w_limit"));
+                if(wFw>limit){
+                    status = "Warning";
+                }
+                Object[] obj = {status,rs.getString("roomNumber"), rs.getString("floor"), rs.getString("wFw"), rs.getString("w_limit")};
                 model.addRow(obj);
             }
 
@@ -115,9 +170,12 @@ public class ViewTable extends javax.swing.JPanel implements ActionListener {
             Logger.getLogger(ViewTable.class.getName()).log(Level.SEVERE, null, ex);
         }
         RowSorter<TableModel> sorter = new TableRowSorter<TableModel>(model);
-        table.setRowSorter(sorter);
-        table.setModel(model);
-        dateTime.setText(startDateTime.get("dateTimeLocal"));
+        this.table.setRowSorter(sorter);
+        this.setTable(model);
+//        table.setRowSorter(sorter);
+//        table.setModel(model);
+        this.dateTime.setText(startDateTime.get("dateTimeLocal"));
+        System.out.println(startDateTime.get("dateTimeLocal"));
 
         dbR.close();
         dbD.close();
@@ -165,6 +223,49 @@ public class ViewTable extends javax.swing.JPanel implements ActionListener {
     public void actionPerformed(ActionEvent e) {
         if (e.getSource() == updateButton) {
             loadData();
+        } else if (e.getSource() == areaCombo) {
+            DBDragoConnex dbDrago = new DBDragoConnex();
+            dbDrago.connect();
+            ResultSet rs = dbDrago.selectDragoConnexByAreaID(SelectComboBox.getAreaID());
+            DefaultComboBoxModel<DragoConnex> dragoConnexModel = new DefaultComboBoxModel<DragoConnex>();
+            try {
+                if (rs != null && rs.next()) {
+                    dragoConnexModel.addElement(new DragoConnex(null, "Select All"));
+                    do {
+                        dragoConnexModel.addElement(new DragoConnex(rs.getString("dragoConnexID"), rs.getString("description")));
+                    } while (rs.next());
+
+                } else {
+                    dragoConnexModel.addElement(new DragoConnex(null, "-----"));
+                }
+               this.setDragoConnexCombo(dragoConnexModel);
+              
+
+            } catch (SQLException ex) {
+                Logger.getLogger(AreaCombo.class.getName()).log(Level.SEVERE, null, ex);
+            }
+
+        }else if(e.getSource() == dragoConnexCombo){
+            DBRoom dbR = new DBRoom();
+            dbR.connect();
+            DefaultComboBoxModel<Floor> floorModel = new DefaultComboBoxModel<Floor>();
+            ResultSet rs = dbR.selectFloorBydragoConnexID(SelectComboBox.getDragoConnexID());
+            try {
+                if(rs!=null && rs.next()){
+                    floorModel.addElement(new Floor(null, "Select All"));
+                    do{
+                        floorModel.addElement(new Floor(rs.getString("floor"), rs.getString("floor")));
+                    }while(rs.next());
+                }else{
+                    floorModel.addElement(new Floor(null, "-----"));
+                }
+            } catch (SQLException ex) {
+                Logger.getLogger(ViewTable.class.getName()).log(Level.SEVERE, null, ex);
+            }
+            this.setFloorCombo(floorModel);
         }
     }
+
 }
+
+

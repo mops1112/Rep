@@ -5,6 +5,7 @@
  */
 package project_sanwa_new;
 
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -49,6 +50,30 @@ public class DBDragoConnex extends Database {
         }
 
         
+    }
+       public ResultSet selectDragoConnexByAreaID(String areaID) {
+        ResultSet rs = null;
+        String sql = "SELECT * FROM dragoConnexes a";
+        String where = " ";
+        if (areaID != null) {
+            where = where + "WHERE a.areaID = '" + areaID + "'";
+        }
+        sql = sql + where;
+        try {
+            s = connect.createStatement();
+            rs = s.executeQuery(sql);
+            if (s != null) {
+                try {
+                    s.close();
+                } catch (SQLException ex) {
+                    Logger.getLogger(Database.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+
+        } catch (SQLException ex) {
+            Logger.getLogger(Database.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return rs;
     }
     
 }

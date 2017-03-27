@@ -230,9 +230,9 @@ public class Organization extends javax.swing.JPanel {
                     dbR.connect();
                     ResultSet rs_floor = dbR.selectFloorByBuilding(building_ID);
                     DefaultComboBoxModel<Floor> model_floor = new DefaultComboBoxModel();
-                    model_floor.addElement(new Floor(null, "None"));
+                    //model_floor.addElement(new Floor(null, "None"));
                     while (rs_floor.next()) {
-                        model_floor.addElement(new Floor(rs_floor.getString("floor"), rs_floor.getString("floor")));
+                       // model_floor.addElement(new Floor(rs_floor.getString("floor"), rs_floor.getString("floor")));
                     }
 
                     com_floor.setModel(model_floor);
@@ -250,8 +250,8 @@ public class Organization extends javax.swing.JPanel {
         try {
             DBRoom dbR = new DBRoom();
             JComboBox comboBox = (JComboBox) evt.getSource();
-            String floor_ID = ((Floor) comboBox.getSelectedItem()).getFloorID();
-            floorNumber = floor_ID;
+            //String floor_ID = ((Floor) comboBox.getSelectedItem()).getFloorID();
+            //floorNumber = floor_ID;
             dbR.connect();
             ResultSet rs_room = dbR.selectRoomByBuildingFloor(buildingID, floorNumber);
             while (rs_room.next()) {

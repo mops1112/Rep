@@ -1,5 +1,7 @@
 
+import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Dimension;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -12,17 +14,27 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.swing.BoxLayout;
+import javax.swing.DefaultComboBoxModel;
 import javax.swing.JPanel;
 import javax.swing.JProgressBar;
+import javax.swing.JTabbedPane;
+import javax.swing.UIManager;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 import org.json.JSONArray;
 import project_sanwa_new.Alert;
+import project_sanwa_new.Area;
+import project_sanwa_new.DBArea;
 import project_sanwa_new.DBDetail;
 import project_sanwa_new.DBRoom;
 import project_sanwa_new.DataAlert;
 import project_sanwa_new.Database;
 import project_sanwa_new.ListAlert;
 import project_sanwa_new.Sanwa;
+import project_sanwa_new.SelectComboBox;
 import project_sanwa_new.StateCheck;
+
 
 /*
  * To change this license header, choose License Headers in Project Properties.
@@ -34,15 +46,20 @@ import project_sanwa_new.StateCheck;
  * @author yotsathon
  */
 public class Main extends javax.swing.JFrame {
+
     /**
      * Creates new form Main
      */
     static ViewTable va;
     static ViewTable viewTable;
-    static ViewTable1 viewTable1;
+
     static Home home;
     static ImportData importData;
     static Manages manage;
+    static Reporting report;
+    static Setting setting;
+    static UpdateProgram updateProgram;
+    static SupportUser supportUser;
 
     public static List<DataAlert> listDataAlert;
     public static List<Alert> alert;
@@ -53,41 +70,67 @@ public class Main extends javax.swing.JFrame {
     Menu menuViewDataTable;
     Menu menuManage;
     Menu menuView;
+    Menu menuReport;
+    Menu menuSetting;
+    Menu menuUpdateProgram;
+    Menu menuSupportUser;
+    JPanel topArea;
     JPanel menu;
     JPanel content;
+    
     static JProgressBar progressBar;
+    SiteTabList siteTabList;
 
     public Main() {
         initComponents();
+
+        this.setBackground(new Color(243, 242, 243));
+        this.setPreferredSize(new Dimension(900, 800));
         content = new JPanel();
-        content.setBackground(new Color(33, 150, 243));
+        content.setBackground(new Color(243, 242, 243));
         home = new Home();
         viewTable = new ViewTable();
-        viewTable1 = new ViewTable1();
+
         manage = new Manages();
         progressBar = new JProgressBar();
-        progressBar.setBackground(new java.awt.Color(255, 0, 0));
-        progressBar.setFont(new java.awt.Font("Times New Roman", 0, 12));
-        progressBar.setStringPainted(true);
+        progressBar.setFont(new java.awt.Font("Century Gothic", 0, 10));
+        progressBar.setStringPainted(true); 
+        progressBar.setBackground(new Color(255, 100,100));
+        
         progressBar.setForeground(Color.blue);
 
         menu = new JPanel();
-        menu.setBackground(new Color(19, 78, 220));
+        menu.setBackground(new Color(243, 242, 243));
 
-        menuHome = new Menu("HOME", "/project_sanwa_new/img/Home_64px.png", content, home);
+        menuHome = new Menu("home", "/project_sanwa_new/img/Mangement_48px_1.png", content, home);
         menuViewDataTable = new Menu("DATA TABLE", "/project_sanwa_new/img/Organization_64px.png", content, viewTable);
-        menuManage = new Menu("SETTING", "/project_sanwa_new/img/Settings_64px.png", content, manage);
-        menuView = new Menu("VIEW", "/project_sanwa_new/img/Organization_64px.png", content, viewTable1);
+        menuManage = new Menu("Management", "/project_sanwa_new/img/Mangement_48px_1.png", content, null);
+        menuReport = new Menu("Reporting", "/project_sanwa_new/img/Reporting_48px.png", content, report);
+        menuSetting = new Menu("Setting", "/project_sanwa_new/img/Setting_48px.png", content, setting);
+        menuUpdateProgram = new Menu("Setting", "/project_sanwa_new/img/Synchronize_48px.png", content, updateProgram);
+        menuSupportUser = new Menu("Setting", "/project_sanwa_new/img/Online Support_48px.png", content, supportUser);
 
-        menu.add(menuHome);
-        menu.add(menuViewDataTable);
-        menu.add(menuView);
         menu.add(menuManage);
+        menu.add(menuReport);
+        menu.add(menuSetting);
+        menu.add(menuUpdateProgram);
+        menu.add(menuSupportUser);
+        // menu.add(menuHome);
+        //menu.add(menuViewDataTable);
+        // menu.add(menuView);
 
-        menu.add(progressBar);
+        topArea = new JPanel();
+        topArea.setLayout(new BoxLayout(topArea, BoxLayout.Y_AXIS));
+        topArea.add(menu);
+        topArea.add(progressBar);
 
-        add(menu); //0, 0, 100, 768
-        add(content); //100, 0, 945, 768
+
+        siteTabList = new SiteTabList();
+
+        content.add(siteTabList);
+        //content.add(tab);
+        add(topArea, BorderLayout.PAGE_START); //0, 0, 100, 768
+        add(content, BorderLayout.CENTER); //100, 0, 945, 768
 
         importData = new ImportData();
 
@@ -106,10 +149,7 @@ public class Main extends javax.swing.JFrame {
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("Main");
-        setMaximumSize(new java.awt.Dimension(1024, 768));
-        setMinimumSize(new java.awt.Dimension(1024, 768));
-        setResizable(false);
-        getContentPane().setLayout(new java.awt.FlowLayout());
+        setMinimumSize(new java.awt.Dimension(1024, 900));
 
         pack();
         setLocationRelativeTo(null);
@@ -142,15 +182,10 @@ public class Main extends javax.swing.JFrame {
             public void run() {
                 synchronized (sc) {
                     try {
-                        Database db = new Database();
-                        db.connect();
-                        if (db.getStatusStartProgram()) {
-                            
-                            getRoomDetailFromServer();
-                            sc.state = true;
-                            sc.notifyAll();
-                        }
-                        db.close();
+
+                        getRoomDetailFromServer();
+                        sc.state = true;
+                        sc.notifyAll();
 
                     } catch (IOException ex) {
                         Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
@@ -195,7 +230,12 @@ public class Main extends javax.swing.JFrame {
         Timer time = new Timer();
         time.schedule(new TimerTask() {
             public void run() {
-                loadData();
+                Database db = new Database();
+                db.connect();
+                if (db.getStatusStartProgram()) {
+                    loadData();
+                }
+                db.close();
             }
 
         }, 0, 1000 * 100);
@@ -278,6 +318,7 @@ public class Main extends javax.swing.JFrame {
         dbR.close();
         dbD.close();
     }
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     // End of variables declaration//GEN-END:variables

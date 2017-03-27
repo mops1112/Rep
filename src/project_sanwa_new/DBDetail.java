@@ -85,7 +85,7 @@ public class DBDetail extends Database {
                 + " INNER JOIN dragoConnexes  c ON b.DragoConnexID = c.DragoConnexID)\n"
                 + " INNER JOIN areas d ON c.areaID = d.areaID)\n"
                 + "INNER JOIN sites e ON d.siteID = e.siteID)\n"
-                + "WHERE a.room_ID = '"+roomID+"' and a.wFw > b.w_limit and detail_date ='"+date+"' and detail_time='"+time+"'";
+                + "WHERE a.room_ID = '" + roomID + "' and a.wFw > b.w_limit and detail_date ='" + date + "' and detail_time='" + time + "'";
         ResultSet rs = null;
 
         try {
@@ -102,12 +102,13 @@ public class DBDetail extends Database {
         return rs;
 
     }
-     public ResultSet selectAllWaterByDateTime(String dateTime) {
+
+    public ResultSet selectAllWaterByDateTime(String dateTime) {
         String date = dateTime.substring(0, 10);
         String time = dateTime.substring(11);
         String sql = "SELECT a.wFw, b.roomNumber, b.w_mBusID, b.w_limit,b.floor, c.description AS dragoConnexName, d.description AS areaName, e.description AS siteName\n"
                 + "FROM (((detail_room_w AS a INNER JOIN room AS b ON a.room_ID = b.room_ID) INNER JOIN dragoConnexes AS c ON b.DragoConnexID = c.DragoConnexID) INNER JOIN areas AS d ON c.areaID = d.areaID) INNER JOIN sites AS e ON d.siteID = e.siteID\n"
-                + "WHERE  detail_date ='"+date+"' and detail_time='"+time+"';";
+                + "WHERE  detail_date ='" + date + "' and detail_time='" + time + "';";
 
         ResultSet rs = null;
 
@@ -125,8 +126,47 @@ public class DBDetail extends Database {
         return rs;
 
     }
-     public void deleteAllDetail() {
-       
+
+    public ResultSet selectAllWaterByDateTimeSiteIDAreaIDDragoConnexIDFloor(String dateTime, String siteID, String areaID, String dragoConnexID, String floor) {
+        String date = dateTime.substring(0, 10);
+        String time = dateTime.substring(11);
+        String sql = "SELECT a.wFw, b.roomNumber, b.w_mBusID, b.w_limit,b.floor, c.description AS dragoConnexName, d.description AS areaName, e.description AS siteName\n"
+                + "FROM (((detail_room_w AS a INNER JOIN room AS b ON a.room_ID = b.room_ID) INNER JOIN dragoConnexes AS c ON b.DragoConnexID = c.DragoConnexID) INNER JOIN areas AS d ON c.areaID = d.areaID) INNER JOIN sites AS e ON d.siteID = e.siteID\n"
+                + "WHERE  detail_date ='" + date + "' and detail_time='" + time + "'";
+        String where = " ";
+        if (siteID != null) {
+            where = where + " and e.siteID='" + siteID + "'";
+        }
+        if (areaID != null) {
+            where = where + " and d.areaID='" + areaID + "'";
+        }
+        if (dragoConnexID != null) {
+            where = where + " and c.DragoConnexID='" + dragoConnexID + "'";
+        }
+        if (floor != null) {
+            where = where + " and b.floor ='"+floor+"'";
+        }
+        
+        sql = sql+where+"ORDER BY b.roomNumber";
+        ResultSet rs = null;
+
+        try {
+            s = this.connect.createStatement();
+            rs = s.executeQuery(sql);
+            if (s != null) {
+                s.close();
+
+            }
+        } catch (SQLException ex) {
+            Logger.getLogger(Database.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
+        return rs;
+
+    }
+
+    public void deleteAllDetail() {
+
         String sql = "DELETE FROM detail_room_w";
         try {
             s = connect.createStatement();
@@ -142,7 +182,6 @@ public class DBDetail extends Database {
             Logger.getLogger(DBSites.class.getName()).log(Level.SEVERE, null, ex);
         }
 
-        
     }
 
 }

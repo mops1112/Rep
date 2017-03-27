@@ -53,18 +53,18 @@ public class temp {
         //line = "["+line+"]";
         if (!"[]".equals(line)) {
             obj = new JSONObject(line);
-//            for (int i = 0; i < obj.getJSONArray("sites").length(); i++) {
-//                dbS.insertSite((obj.getJSONArray("sites")).getJSONObject(i).get("siteID").toString(), (obj.getJSONArray("sites")).getJSONObject(i).get("code").toString(), (obj.getJSONArray("sites")).getJSONObject(i).get("description").toString(), (obj.getJSONArray("sites")).getJSONObject(i).get("createdDateTime").toString(), (obj.getJSONArray("sites")).getJSONObject(i).get("updatedDateTime").toString(), (obj.getJSONArray("sites")).getJSONObject(i).get("isActive").toString(), (obj.getJSONArray("sites")).getJSONObject(i).get("address").toString());
-//            }
-//            for (int i = 0; i < obj.getJSONArray("areas").length(); i++) {
-//                dbA.insertArea((obj.getJSONArray("areas")).getJSONObject(i).get("areaID").toString(), (obj.getJSONArray("areas")).getJSONObject(i).get("siteID").toString(), (obj.getJSONArray("areas")).getJSONObject(i).get("code").toString(), (obj.getJSONArray("areas")).getJSONObject(i).get("description").toString());
-//            }
-//            for (int i = 0; i < obj.getJSONArray("dragoConnexes").length(); i++) {
-//                dbDC.insertDragoConnex((obj.getJSONArray("dragoConnexes")).getJSONObject(i).get("dragoConnexID").toString(), (obj.getJSONArray("dragoConnexes")).getJSONObject(i).get("areaID").toString(), (obj.getJSONArray("dragoConnexes")).getJSONObject(i).get("description").toString(), (obj.getJSONArray("dragoConnexes")).getJSONObject(i).get("createdDateTime").toString(), (obj.getJSONArray("dragoConnexes")).getJSONObject(i).get("updatedDateTime").toString(), (obj.getJSONArray("dragoConnexes")).getJSONObject(i).get("isActive").toString());
-//            }
+            for (int i = 0; i < obj.getJSONArray("sites").length(); i++) {
+                dbS.insertSite((obj.getJSONArray("sites")).getJSONObject(i).get("siteID").toString(), (obj.getJSONArray("sites")).getJSONObject(i).get("code").toString(), (obj.getJSONArray("sites")).getJSONObject(i).get("description").toString(), (obj.getJSONArray("sites")).getJSONObject(i).get("createdDateTime").toString(), (obj.getJSONArray("sites")).getJSONObject(i).get("updatedDateTime").toString(), (obj.getJSONArray("sites")).getJSONObject(i).get("isActive").toString(), (obj.getJSONArray("sites")).getJSONObject(i).get("address").toString());
+            }
+            for (int i = 0; i < obj.getJSONArray("areas").length(); i++) {
+                dbA.insertArea((obj.getJSONArray("areas")).getJSONObject(i).get("areaID").toString(), (obj.getJSONArray("areas")).getJSONObject(i).get("siteID").toString(), (obj.getJSONArray("areas")).getJSONObject(i).get("code").toString(), (obj.getJSONArray("areas")).getJSONObject(i).get("description").toString());
+            }
+            for (int i = 0; i < obj.getJSONArray("dragoConnexes").length(); i++) {
+                dbDC.insertDragoConnex((obj.getJSONArray("dragoConnexes")).getJSONObject(i).get("dragoConnexID").toString(), (obj.getJSONArray("dragoConnexes")).getJSONObject(i).get("areaID").toString(), (obj.getJSONArray("dragoConnexes")).getJSONObject(i).get("description").toString(), (obj.getJSONArray("dragoConnexes")).getJSONObject(i).get("createdDateTime").toString(), (obj.getJSONArray("dragoConnexes")).getJSONObject(i).get("updatedDateTime").toString(), (obj.getJSONArray("dragoConnexes")).getJSONObject(i).get("isActive").toString());
+            }
             for (int i = 0; i < obj.getJSONArray("meters").length(); i++) {
                 JSONObject roomNumber = new JSONObject((obj.getJSONArray("meters")).getJSONObject(i).get("meterSetting").toString());
-               // dbR.insertRoom((obj.getJSONArray("meters")).getJSONObject(i).get("mBusID").toString(), (obj.getJSONArray("meters")).getJSONObject(i).get("dragoConnexID").toString(), roomNumber.get("RoomNumber").toString());
+                dbR.insertRoom((obj.getJSONArray("meters")).getJSONObject(i).get("mBusID").toString(), (obj.getJSONArray("meters")).getJSONObject(i).get("dragoConnexID").toString(), roomNumber.get("RoomNumber").toString(),"500");
 
             }
 

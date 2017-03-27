@@ -10,34 +10,39 @@ package project_sanwa_new;
  * @author yotsathon
  */
 public class Floor {
-    String floorID;
-    String floorName;
 
-    public Floor(String floorID, String floorName) {
+    String floorID;
+    String floorNumber;
+
+    public Floor(String floorID, String floorNumber) {
         this.floorID = floorID;
-        this.floorName = floorName;
+        this.floorNumber = floorNumber;
     }
 
     public String getFloorID() {
         return floorID;
     }
 
-    public String getFloorName() {
-        return floorName;
-    }
-
     public void setFloorID(String floorID) {
         this.floorID = floorID;
     }
 
-    public void setFloorName(String floorName) {
-        this.floorName = floorName;
+    public String getFloorNumber() {
+        return floorNumber;
     }
+
+    public void setFloorNumber(String floorNumber) {
+        this.floorNumber = floorNumber;
+    }
+
+   
+
 
     @Override
     public String toString() {
-        return "floor " + floorName;
+        return  "floor : "+floorNumber ;
     }
+
 
     
     

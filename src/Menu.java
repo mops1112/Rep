@@ -29,10 +29,10 @@ public class Menu extends JPanel implements MouseListener {
         icon = new JLabel();
         icon.setIcon(new javax.swing.ImageIcon(getClass().getResource(path)));
         menuText = new JLabel(text);
-        menuText.setForeground(Color.white);
-        menuText.setFont(new Font("times new roman", Font.BOLD, 14));
-        this.setPreferredSize(new Dimension(100, 100));
-        this.setBackground(new Color(19, 78, 220));
+        menuText.setForeground(Color.black);
+        menuText.setFont(new Font("Century Gothic",0, 12));
+        this.setPreferredSize(new Dimension(90, 80));
+        this.setBackground(new Color(191,189,190));
         this.addMouseListener(this);
         add(icon);
         add(menuText);
@@ -41,12 +41,12 @@ public class Menu extends JPanel implements MouseListener {
 
     @Override
     public void mouseEntered(MouseEvent evt) {
-        this.setBackground(new Color(21, 28, 250));
+        this.setBackground(new Color(150, 149, 150));
     }
 
     @Override
     public void mouseExited(MouseEvent evt) {
-        this.setBackground(new Color(19, 78, 220));
+        this.setBackground(new Color(191,189,190));
 
     }
 

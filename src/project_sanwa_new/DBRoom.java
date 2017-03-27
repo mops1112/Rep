@@ -69,8 +69,6 @@ public class DBRoom extends Database {
         return rs;
     }
 
-   
-
     public ResultSet selectAllWaterByRoomIDDateTime(String roomID, String dateTime) {
         String date = dateTime.substring(0, 10);
         String time = dateTime.substring(11);
@@ -147,6 +145,31 @@ public class DBRoom extends Database {
 
     }
 
+    public ResultSet selectFloorBydragoConnexID(String dragoConnexID) {
+
+        String sql = "SELECT DISTINCT  a.floor FROM room a ";
+        String where = " ";
+        if (dragoConnexID != null) {
+           where = where+"WHERE a.dragoConnexID='" + dragoConnexID + "'" ;
+        }
+        sql = sql + where;
+        ResultSet rs = null;
+        try {
+            s = this.connect.createStatement();
+            rs = s.executeQuery(sql);
+
+            if (s != null) {
+                s.close();
+
+            }
+        } catch (SQLException ex) {
+            Logger.getLogger(Database.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
+        return rs;
+
+    }
+
 //    public void insertRoom(String building_id, String room_number, String e_meter, String w_meter, String user) throws SQLException {
 //        String sql = "INSERT INTO `room`(`building_id`, `room_number`, `e_meter`, `w_meter`, `create_date`, `create_by`, `update_date`, `update_by`) VALUES (" + building_id + ",'" + room_number + "',\"" + e_meter + "\", \"" + w_meter + "\",NOW(),'" + user + "',NOW(),'" + user + "')";
 //        s = connect.createStatement();
@@ -161,7 +184,7 @@ public class DBRoom extends Database {
 //    }
     public void insertRoom(String w_mBusID, String dragoConnexID, String roomNumber, String w_limit) throws SQLException {
         try {
-            String sql = "INSERT INTO room(w_mBusID, dragoConnexID, roomNumber, w_limit, floor) VALUES ('" + w_mBusID + "','" + dragoConnexID + "','" + roomNumber + "', '"+w_limit+"','0')";
+            String sql = "INSERT INTO room(w_mBusID, dragoConnexID, roomNumber, w_limit, floor) VALUES ('" + w_mBusID + "','" + dragoConnexID + "','" + roomNumber + "', '" + w_limit + "','0')";
             s = connect.createStatement();
             s.execute(sql);
             if (s != null) {
@@ -262,8 +285,9 @@ public class DBRoom extends Database {
         return rs;
 
     }
-    public ResultSet selectAllRoomDragoConnex(){
-     String sql = "SELECT a.room_ID, a.roomNumber, a.w_mBusID, a.w_limit, a.floor, b.description FROM room a INNER JOIN dragoConnexes b ON a.dragoConnexID = b.dragoConnexID ORDER BY b.description, a.roomNumber";
+
+    public ResultSet selectAllRoomDragoConnex() {
+        String sql = "SELECT a.room_ID, a.roomNumber, a.w_mBusID, a.w_limit, a.floor, b.description FROM room a INNER JOIN dragoConnexes b ON a.dragoConnexID = b.dragoConnexID ORDER BY b.description, a.roomNumber";
 
         ResultSet rs = null;
 
@@ -280,9 +304,10 @@ public class DBRoom extends Database {
 
         return rs;
     }
-    public int updateRoom(String roomID,String roomNumber, String w_limit, String floor) {
+
+    public int updateRoom(String roomID, String roomNumber, String w_limit, String floor) {
         int rs = 0;
-        String sql = "UPDATE room a SET a.roomNumber = '"+roomNumber+"', a.w_limit = '"+w_limit+"', a.floor = '"+floor+"' WHERE room_ID = '"+roomID+"' ";
+        String sql = "UPDATE room a SET a.roomNumber = '" + roomNumber + "', a.w_limit = '" + w_limit + "', a.floor = '" + floor + "' WHERE room_ID = '" + roomID + "' ";
         try {
             s = connect.createStatement();
             rs = s.executeUpdate(sql);
@@ -299,9 +324,10 @@ public class DBRoom extends Database {
 
         return rs;
     }
-     public int updateFloor(String roomID,String floor) {
+
+    public int updateFloor(String roomID, String floor) {
         int rs = 0;
-        String sql = "UPDATE room a SET a.floor = '"+floor+"' WHERE room_ID = '"+roomID+"' ";
+        String sql = "UPDATE room a SET a.floor = '" + floor + "' WHERE room_ID = '" + roomID + "' ";
         try {
             s = connect.createStatement();
             rs = s.executeUpdate(sql);
@@ -318,6 +344,5 @@ public class DBRoom extends Database {
 
         return rs;
     }
-    
 
 }
