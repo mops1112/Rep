@@ -108,7 +108,7 @@ public class Main extends javax.swing.JFrame {
         menuReport = new Menu("Reporting", "/project_sanwa_new/img/Reporting_48px.png", content, report);
         menuSetting = new Menu("Setting", "/project_sanwa_new/img/Setting_48px.png", content, setting);
         menuUpdateProgram = new Menu("Setting", "/project_sanwa_new/img/Synchronize_48px.png", content, updateProgram);
-        menuSupportUser = new Menu("Setting", "/project_sanwa_new/img/Online Support_48px.png", content, supportUser);
+        menuSupportUser = new Menu("Support", "/project_sanwa_new/img/Online Support_48px.png", content, supportUser);
 
         menu.add(menuManage);
         menu.add(menuReport);
