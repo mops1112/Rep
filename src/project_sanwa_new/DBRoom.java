@@ -150,7 +150,7 @@ public class DBRoom extends Database {
         String sql = "SELECT DISTINCT  a.floor FROM room a ";
         String where = " ";
         if (dragoConnexID != null) {
-           where = where+"WHERE a.dragoConnexID='" + dragoConnexID + "'" ;
+            where = where + "WHERE a.dragoConnexID='" + dragoConnexID + "'";
         }
         sql = sql + where;
         ResultSet rs = null;
@@ -182,9 +182,9 @@ public class DBRoom extends Database {
 //            }
 //        }
 //    }
-    public void insertRoom(String w_mBusID, String dragoConnexID, String roomNumber, String w_limit) throws SQLException {
+    public void insertRoom(String w_mBusID, String dragoConnexID, String roomNumber, String w_high_treshold, String w_low_treshold) throws SQLException {
         try {
-            String sql = "INSERT INTO room(w_mBusID, dragoConnexID, roomNumber, w_limit, floor) VALUES ('" + w_mBusID + "','" + dragoConnexID + "','" + roomNumber + "', '" + w_limit + "','0')";
+            String sql = "INSERT INTO room(w_mBusID, dragoConnexID, roomNumber, w_high_treshold,w_low_treshold, floor) VALUES ('" + w_mBusID + "','" + dragoConnexID + "','" + roomNumber + "', '" + w_high_treshold + "','" + w_low_treshold + "', '0')";
             s = connect.createStatement();
             s.execute(sql);
             if (s != null) {
@@ -287,7 +287,7 @@ public class DBRoom extends Database {
     }
 
     public ResultSet selectAllRoomDragoConnex() {
-        String sql = "SELECT a.room_ID, a.roomNumber, a.w_mBusID, a.w_limit, a.floor, b.description FROM room a INNER JOIN dragoConnexes b ON a.dragoConnexID = b.dragoConnexID ORDER BY b.description, a.roomNumber";
+        String sql = "SELECT a.room_ID, a.roomNumber, a.w_mBusID, a.w_high_treshold, a.w_low_treshold, a.w_max_per_day,a.floor, b.description FROM room a INNER JOIN dragoConnexes b ON a.dragoConnexID = b.dragoConnexID ORDER BY b.description, a.roomNumber";
 
         ResultSet rs = null;
 
@@ -305,9 +305,9 @@ public class DBRoom extends Database {
         return rs;
     }
 
-    public int updateRoom(String roomID, String roomNumber, String w_limit, String floor) {
+    public int updateRoom(String roomID, String roomNumber, String w_high_treshold, String w_low_treshold, String w_max_per_day, String floor) {
         int rs = 0;
-        String sql = "UPDATE room a SET a.roomNumber = '" + roomNumber + "', a.w_limit = '" + w_limit + "', a.floor = '" + floor + "' WHERE room_ID = '" + roomID + "' ";
+        String sql = "UPDATE room a SET a.roomNumber = '" + roomNumber + "', a.w_high_treshold = '" + w_high_treshold + "',a.w_low_treshold = '" + w_low_treshold + "',w_max_per_day ='" + w_max_per_day + "', a.floor = '" + floor + "' WHERE room_ID = '" + roomID + "' ";
         try {
             s = connect.createStatement();
             rs = s.executeUpdate(sql);
@@ -345,4 +345,63 @@ public class DBRoom extends Database {
         return rs;
     }
 
+    public int updateHighTreshold(String roomID, String highTreshold) {
+        int rs = 0;
+        String sql = "UPDATE room a SET a.w_high_treshold = '" + highTreshold + "' WHERE room_ID = '" + roomID + "' ";
+        try {
+            s = connect.createStatement();
+            rs = s.executeUpdate(sql);
+            if (s != null) {
+                try {
+                    s.close();
+                } catch (SQLException ex) {
+                    Logger.getLogger(Database.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+        } catch (SQLException ex) {
+            Logger.getLogger(DBSites.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
+        return rs;
+    }
+
+    public int updateLowTreshold(String roomID, String lowTreshold) {
+        int rs = 0;
+        String sql = "UPDATE room a SET a.w_low_treshold = '" + lowTreshold + "' WHERE room_ID = '" + roomID + "' ";
+        try {
+            s = connect.createStatement();
+            rs = s.executeUpdate(sql);
+            if (s != null) {
+                try {
+                    s.close();
+                } catch (SQLException ex) {
+                    Logger.getLogger(Database.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+        } catch (SQLException ex) {
+            Logger.getLogger(DBSites.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
+        return rs;
+    }
+
+    public int updateMaxPerDay(String roomID, String maxPerDay) {
+        int rs = 0;
+        String sql = "UPDATE room a SET a.w_max_per_day = '" + maxPerDay + "' WHERE room_ID = '" + roomID + "' ";
+        try {
+            s = connect.createStatement();
+            rs = s.executeUpdate(sql);
+            if (s != null) {
+                try {
+                    s.close();
+                } catch (SQLException ex) {
+                    Logger.getLogger(Database.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+        } catch (SQLException ex) {
+            Logger.getLogger(DBSites.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
+        return rs;
+    }
 }

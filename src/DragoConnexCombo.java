@@ -1,19 +1,13 @@
 
-import java.awt.Dimension;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JComboBox;
-import javax.swing.JPanel;
 import project_sanwa_new.DBDragoConnex;
-import project_sanwa_new.DBRoom;
 import project_sanwa_new.DragoConnex;
 import project_sanwa_new.DragoConnexComboBoxRenderer;
-import project_sanwa_new.Floor;
 import project_sanwa_new.SelectComboBox;
 
 /*

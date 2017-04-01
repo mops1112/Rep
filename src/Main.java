@@ -77,7 +77,7 @@ public class Main extends javax.swing.JFrame {
     JPanel topArea;
     JPanel menu;
     JPanel content;
-    
+
     static JProgressBar progressBar;
     SiteTabList siteTabList;
 
@@ -94,17 +94,17 @@ public class Main extends javax.swing.JFrame {
         manage = new Manages();
         progressBar = new JProgressBar();
         progressBar.setFont(new java.awt.Font("Century Gothic", 0, 10));
-        progressBar.setStringPainted(true); 
-        progressBar.setBackground(new Color(255, 100,100));
-        
+        progressBar.setStringPainted(true);
+        progressBar.setBackground(new Color(255, 100, 100));
+
         progressBar.setForeground(Color.blue);
 
         menu = new JPanel();
         menu.setBackground(new Color(243, 242, 243));
 
-        menuHome = new Menu("home", "/project_sanwa_new/img/Mangement_48px_1.png", content, home);
-        menuViewDataTable = new Menu("DATA TABLE", "/project_sanwa_new/img/Organization_64px.png", content, viewTable);
-        menuManage = new Menu("Management", "/project_sanwa_new/img/Mangement_48px_1.png", content, null);
+//        menuHome = new Menu("home", "/project_sanwa_new/img/Mangement_48px_1.png", content, home);
+//        menuViewDataTable = new Menu("DATA TABLE", "/project_sanwa_new/img/Organization_64px.png", content, viewTable);
+        menuManage = new Menu("Management", "/project_sanwa_new/img/Mangement_48px_1.png", content, manage);
         menuReport = new Menu("Reporting", "/project_sanwa_new/img/Reporting_48px.png", content, report);
         menuSetting = new Menu("Setting", "/project_sanwa_new/img/Setting_48px.png", content, setting);
         menuUpdateProgram = new Menu("Setting", "/project_sanwa_new/img/Synchronize_48px.png", content, updateProgram);
@@ -123,7 +123,6 @@ public class Main extends javax.swing.JFrame {
         topArea.setLayout(new BoxLayout(topArea, BoxLayout.Y_AXIS));
         topArea.add(menu);
         topArea.add(progressBar);
-
 
         siteTabList = new SiteTabList();
 
@@ -238,7 +237,7 @@ public class Main extends javax.swing.JFrame {
                 db.close();
             }
 
-        }, 0, 1000 * 100);
+        }, 0, 1000 * 5000);
 
     }
 
@@ -257,11 +256,12 @@ public class Main extends javax.swing.JFrame {
         BufferedReader in;
         JSONArray jsonArray;
         dateTime = startDateTime.get("dateTimeLocal").toString();
-//        try {
+
         url = new URL("http://dragoservices.azurewebsites.net/api/DragoServices/MeterRecord?s=" + startDateTime.get("dateTimeServer") + "%2B0700");
         in = new BufferedReader(new InputStreamReader(url.openStream()));
         String line = in.readLine();
         if (!"[]".equals(line)) {
+
             jsonArray = new JSONArray(line);
             float count = jsonArray.length();
             for (int i = 0; i < jsonArray.length(); i++) {
@@ -275,10 +275,67 @@ public class Main extends javax.swing.JFrame {
                     ResultSet roomID = dbR.selectRoomIDBymBusID(dragoConnexID, mBusID);
                     if (roomID.next()) {
                         dbD.insertDetailRoomWater(roomID.getString("room_ID").toString(), dateTime, wFl, jsonArray.getJSONObject(i).getJSONArray("records").getJSONObject(0).get("wFw").toString(), jsonArray.getJSONObject(i).getJSONArray("records").getJSONObject(0).get("wRv").toString(), jsonArray.getJSONObject(i).getJSONArray("records").getJSONObject(0).get("wVo").toString());
+                        //System.out.println(roomID.getString("room_ID").toString());
+                    }
+
+                }
+                float percen = (progress / count) * 100;
+                progressBar.setString(Math.round(percen) + "%");
+                progressBar.setValue(Math.round(percen));
+                progress++;
+
+            }
+
+        }
+        dbD.close();
+        dbR.close();
+    }
+
+    public static void getRoomDetailFromServer2() throws IOException, SQLException {
+        DBRoom dbR = new DBRoom();
+        DBDetail dbD = new DBDetail();
+        dbR.connect();
+        dbD.connect();
+
+        Sanwa sw = new Sanwa();
+        Map<String, String> startDateTime = sw.getCurentDateTime();
+        //ResultSet rs = dbR.selectRoomByBuildingFloor(null, null);
+
+        float progress = 1;
+        URL url;
+        BufferedReader in;
+        JSONArray jsonArray;
+        dateTime = startDateTime.get("dateTimeLocal").toString();
+
+//        try {
+        url = new URL("http://dragoservices.azurewebsites.net/api/DragoServices/MeterRecord?s=" + "2017-04-01T00:00:00" + "%2B0700");
+        in = new BufferedReader(new InputStreamReader(url.openStream()));
+        String line = in.readLine();
+        if (!"[]".equals(line)) {
+
+            jsonArray = new JSONArray(line);
+            float count = jsonArray.length();
+            for (int i = 0; i < jsonArray.length(); i++) {
+                String mBusID = jsonArray.getJSONObject(i).get("mBusID").toString();
+                String dragoConnexID = jsonArray.getJSONObject(i).get("dragoConnexID").toString();
+                dragoConnexID = dragoConnexID.substring(2);
+
+                JSONArray subMBus = jsonArray.getJSONObject(i).getJSONArray("records");
+                for (int j = 0; j < subMBus.length(); j++) {
+                    dateTime = subMBus.getJSONObject(j).getString("t").toString();
+                    String wFl = subMBus.getJSONObject(j).get("wFl").toString();
+                    int rs = dbR.selectIDBymBusIDDateTime(dragoConnexID, mBusID, dateTime);
+                    if (rs == 0) {
+                        ResultSet roomID = dbR.selectRoomIDBymBusID(dragoConnexID, mBusID);
+                        if (roomID.next()) {
+                            dbD.insertDetailRoomWater(roomID.getString("room_ID").toString(), dateTime, wFl, subMBus.getJSONObject(j).get("wFw").toString(), subMBus.getJSONObject(j).get("wRv").toString(), subMBus.getJSONObject(j).get("wVo").toString());
+                            //System.out.println(roomID.getString("room_ID").toString());
+                        }
 
                     }
 
                 }
+
                 float percen = (progress / count) * 100;
                 progressBar.setString(Math.round(percen) + "%");
                 progressBar.setValue(Math.round(percen));
@@ -306,7 +363,7 @@ public class Main extends javax.swing.JFrame {
                 if (alert.next()) {
                     String date = dateTime.substring(0, 10);
                     String time = dateTime.substring(11);
-                    listAlert.setListAlert(alert.getString("siteName"), alert.getString("areaName"), alert.getString("dragoConnexName"), alert.getString("roomNumber"), alert.getString("w_mBusID"), alert.getString("w_limit"), alert.getString("wFw"), date, time);
+                    //listAlert.setListAlert(alert.getString("siteName"), alert.getString("areaName"), alert.getString("dragoConnexName"), alert.getString("roomNumber"), alert.getString("w_mBusID"), alert.getString("w_high_treshold"), alert.getString("wFw"), date, time);
 
                 }
             }

@@ -101,7 +101,7 @@ public class Sanwa {
         JSONArray jsonArray = new JSONArray(line);
         DBBuilding dbB = new DBBuilding();
         dbB.connect();
-       
+
         for (int i = 0; i < jsonArray.length(); i++) {
             JSONObject obj = jsonArray.getJSONObject(i);
             String name = obj.getString("description");
@@ -160,5 +160,21 @@ public class Sanwa {
         return dateTimeStart;
     }
 
-    
+    public Map getStartDateTime() {
+        Map<String, String> dateTimeStart = new HashMap<String, String>();
+        DateFormat dateFormat = new SimpleDateFormat("mm", Locale.ENGLISH);
+        String minute = dateFormat.format(new Date());
+        //minute = Integer.toString((Integer.parseInt(minute) / 15) * 15);
+        minute = String.format("%02d", (Integer.parseInt(minute) / 15) * 15);
+        //minute = String.format("%02d", (Integer.parseInt(minute) / 15) * 15);
+        dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'00:00:00", Locale.ENGLISH);
+        dateTimeStart.put("dateTimeLocal", dateFormat.format(new Date()));
+        //dateTimeStart.put("dateTimeLocal", "2016-11-01T14:45:00") ;
+        dateFormat.setTimeZone(TimeZone.getTimeZone("GMT"));
+
+        dateTimeStart.put("dateTimeServer", dateFormat.format(new Date()));
+        //dateTimeStart.put("dateTimeServer", "2016-11-01T21:45:00") ;
+        return dateTimeStart;
+    }
+
 }

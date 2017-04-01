@@ -25,7 +25,7 @@ public class FloorComboBoxRenderer extends JLabel implements ListCellRenderer {
     public Component getListCellRendererComponent(JList list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
         if (isSelected) {
             Floor obj = (Floor) value;
-            SelectComboBox.setFloorNumber(((Floor) value).getFloorNumber());
+            SelectComboBox.setFloorNumber(((Floor) value).getFloorID());
         }
         setText(value.toString());
 

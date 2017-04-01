@@ -11,7 +11,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
-import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
@@ -63,17 +62,21 @@ public class SiteManagement extends javax.swing.JPanel implements MouseListener 
             }
 
         };
-        table.setPreferredScrollableViewportSize(new Dimension(600, 500));
+        table.setPreferredScrollableViewportSize(new Dimension(650, 400));
         table.setFillsViewportHeight(true);
         table.addMouseListener(this);
         JScrollPane scrollPane = new JScrollPane(table);
-        description = new JTextField("description", 20);
-        address = new JTextField("address", 20);
+        description = new JTextField("description", 50);
+        description.setMaximumSize(description.getPreferredSize());
+        address = new JTextField("address", 50);
+        address.setMaximumSize(address.getPreferredSize());
         saveButton = new JButton("Save");
         saveButton.setEnabled(false);
         saveButton.addMouseListener(this);
 
         edit = new JPanel();
+        edit.setLayout(new BoxLayout(edit, BoxLayout.Y_AXIS));
+        edit.setPreferredSize(new Dimension(10, 100));
         edit.add(description);
         edit.add(address);
         edit.add(saveButton);

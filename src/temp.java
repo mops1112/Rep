@@ -64,7 +64,7 @@ public class temp {
             }
             for (int i = 0; i < obj.getJSONArray("meters").length(); i++) {
                 JSONObject roomNumber = new JSONObject((obj.getJSONArray("meters")).getJSONObject(i).get("meterSetting").toString());
-                dbR.insertRoom((obj.getJSONArray("meters")).getJSONObject(i).get("mBusID").toString(), (obj.getJSONArray("meters")).getJSONObject(i).get("dragoConnexID").toString(), roomNumber.get("RoomNumber").toString(),"500");
+                dbR.insertRoom((obj.getJSONArray("meters")).getJSONObject(i).get("mBusID").toString(), (obj.getJSONArray("meters")).getJSONObject(i).get("dragoConnexID").toString(), roomNumber.get("RoomNumber").toString(),roomNumber.get("HighTreshold").toString(), roomNumber.get("LowTreshold").toString());
 
             }
 

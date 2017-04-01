@@ -7,6 +7,10 @@ import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.URL;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Map;
@@ -15,7 +19,6 @@ import java.util.logging.Logger;
 import javax.swing.AbstractAction;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JButton;
-import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
@@ -28,6 +31,7 @@ import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
 import org.jfree.ui.RefineryUtilities;
+import org.json.JSONArray;
 import project_sanwa_new.Area;
 import project_sanwa_new.DBDetail;
 import project_sanwa_new.DBDragoConnex;
@@ -47,11 +51,12 @@ import project_sanwa_new.SelectComboBox;
  *
  * @author yotsathon
  */
-public class ViewTable extends javax.swing.JPanel implements ActionListener{
+public class ViewTable extends javax.swing.JPanel implements ActionListener {
 
     /**
      * Creates new form ViewTable
      */
+    static Map<String, String> currentDateTime;
     static Map<String, String> startDateTime;
     private JLabel dateTime;
     private JTable table;
@@ -68,7 +73,7 @@ public class ViewTable extends javax.swing.JPanel implements ActionListener{
 
     public void setAreaCombo(DefaultComboBoxModel<Area> AreaModel) {
         this.areaCombo.setModel(AreaModel);
-    
+
     }
 
     public void setFloorCombo(DefaultComboBoxModel<Floor> FloorModel) {
@@ -76,7 +81,7 @@ public class ViewTable extends javax.swing.JPanel implements ActionListener{
     }
 
     public void setDragoConnexCombo(DefaultComboBoxModel<DragoConnex> dragoConnexModel) {
-       this.dragoConnexCombo.setModel(dragoConnexModel);
+        this.dragoConnexCombo.setModel(dragoConnexModel);
     }
 
     public ViewTable() {
@@ -93,23 +98,20 @@ public class ViewTable extends javax.swing.JPanel implements ActionListener{
             public Component prepareRenderer(TableCellRenderer renderer, int rowIndex, int vColIndex) {
                 Component c = super.prepareRenderer(renderer, rowIndex, vColIndex);
                 if (rowIndex % 2 == 0 && !isCellSelected(rowIndex, vColIndex)) {
-                    c.setBackground(new Color(243,242,243));
+                    c.setBackground(new Color(243, 242, 243));
                 } else if (isCellSelected(rowIndex, vColIndex)) {
-                    c.setBackground(new Color(174,209,241));
-                    c.setForeground(new Color(0,0,0));
+                    c.setBackground(new Color(174, 209, 241));
+                    c.setForeground(new Color(0, 0, 0));
                 } else {
-                        //c.setBackground(getBackground());
-                     c.setBackground(new Color(255,255,255));
+                    //c.setBackground(getBackground());
+                    c.setBackground(new Color(255, 255, 255));
                 }
-                
-                float wFw = Float.valueOf((table.getValueAt(rowIndex,3)).toString());
-                float limit = Float.valueOf((table.getValueAt(rowIndex,4)).toString());
-                if(wFw > limit) {
-                     c.setBackground(new Color(244,196,55));
-                     
-                } 
-                    
-                
+                String highlight = table.getValueAt(rowIndex, 0).toString();
+                if (!highlight.equals("Normal")) {
+                    c.setBackground(new Color(244, 196, 55));
+                }
+
+
                 return c;
             }
 
@@ -117,7 +119,7 @@ public class ViewTable extends javax.swing.JPanel implements ActionListener{
         // table.setFont(new Font("times new roman", Font.PLAIN, 14));
         table.setPreferredScrollableViewportSize(new Dimension(800, 600));
         table.setFillsViewportHeight(true);
-        table.setFont(new Font("Century Gothic",0, 12));
+        table.setFont(new Font("Century Gothic", 0, 12));
         JScrollPane scrollPane = new JScrollPane(table);
         //loadData();
         SelectComboBox selectComboBox = new SelectComboBox();
@@ -138,9 +140,45 @@ public class ViewTable extends javax.swing.JPanel implements ActionListener{
         add(scrollPane, BorderLayout.CENTER);
         setVisible(true);
 
-        
-       
+    }
 
+    public static void getRoomDetailFromServerByStart() throws IOException, SQLException {
+        DBRoom dbR = new DBRoom();
+        DBDetail dbD = new DBDetail();
+        dbR.connect();
+        dbD.connect();
+
+        URL url;
+        BufferedReader in;
+        JSONArray jsonArray;
+
+        url = new URL("http://dragoservices.azurewebsites.net/api/DragoServices/MeterRecord?s=" + startDateTime.get("dateTimeServer") + "%2B0700");
+        in = new BufferedReader(new InputStreamReader(url.openStream()));
+        String line = in.readLine();
+        if (!"[]".equals(line)) {
+            jsonArray = new JSONArray(line);
+            float count = jsonArray.length();
+            for (int i = 0; i < jsonArray.length(); i++) {
+                //String t = jsonArray.getJSONObject(i).getJSONArray("records").getJSONObject(0).get("t").toString();
+                String mBusID = jsonArray.getJSONObject(i).get("mBusID").toString();
+                String dragoConnexID = jsonArray.getJSONObject(i).get("dragoConnexID").toString();
+                dragoConnexID = dragoConnexID.substring(2);
+                String wFl = jsonArray.getJSONObject(i).getJSONArray("records").getJSONObject(0).get("wFl").toString();
+                int rs = dbR.selectIDBymBusIDDateTime(dragoConnexID, mBusID, startDateTime.get("dateTimeLocal"));
+                if (rs == 0) {
+                    ResultSet roomID = dbR.selectRoomIDBymBusID(dragoConnexID, mBusID);
+                    if (roomID.next()) {
+                        dbD.insertDetailRoomWater(roomID.getString("room_ID").toString(), startDateTime.get("dateTimeLocal"), wFl, jsonArray.getJSONObject(i).getJSONArray("records").getJSONObject(0).get("wFw").toString(), jsonArray.getJSONObject(i).getJSONArray("records").getJSONObject(0).get("wRv").toString(), jsonArray.getJSONObject(i).getJSONArray("records").getJSONObject(0).get("wVo").toString());
+
+                    }
+
+                }
+
+            }
+
+        }
+        dbD.close();
+        dbR.close();
     }
 
     private void loadData() {
@@ -148,22 +186,73 @@ public class ViewTable extends javax.swing.JPanel implements ActionListener{
         DBDetail dbD = new DBDetail();
         dbR.connect();
         dbD.connect();
-        String columnNames[] = {"Status","RoomNumber", "Floor", "Water Flow (wFw)", "HighTreshold"};
+        String columnNames[] = {"Status", "RoomNumber", "Floor", " wFl(FlowRate)", "Today"};
         DefaultTableModel model = new DefaultTableModel(new Object[0][0], columnNames);
         Sanwa sw = new Sanwa();
-        startDateTime = sw.getCurentDateTime();
+        currentDateTime = sw.getCurentDateTime();
+        startDateTime = sw.getStartDateTime();
         try {
-            ResultSet rs = dbD.selectAllWaterByDateTimeSiteIDAreaIDDragoConnexIDFloor(startDateTime.get("dateTimeLocal"),SelectComboBox.getSiteID(),SelectComboBox.getAreaID(),SelectComboBox.getDragoConnexID(),SelectComboBox.getFloorNumber());
-             
-             while (rs.next()) {
-                String status = "Normal";
-                float wFw = Float.valueOf(rs.getString("wFw"));
-                float limit = Float.valueOf(rs.getString("w_limit"));
-                if(wFw>limit){
-                    status = "Warning";
-                }
-                Object[] obj = {status,rs.getString("roomNumber"), rs.getString("floor"), rs.getString("wFw"), rs.getString("w_limit")};
-                model.addRow(obj);
+            ResultSet allRoom = dbD.selectAllWaterBySiteIDAreaIDDragoConnexIDFloor(SelectComboBox.getSiteID(), SelectComboBox.getAreaID(), SelectComboBox.getDragoConnexID(), SelectComboBox.getFloorNumber());
+            ResultSet rs_current = dbD.selectAllWaterByDateTimeSiteIDAreaIDDragoConnexIDFloor(currentDateTime.get("dateTimeLocal"), SelectComboBox.getSiteID(), SelectComboBox.getAreaID(), SelectComboBox.getDragoConnexID(), SelectComboBox.getFloorNumber());
+            ResultSet rs_start = dbD.selectAllWaterByDateTimeSiteIDAreaIDDragoConnexIDFloor(startDateTime.get("dateTimeLocal"), SelectComboBox.getSiteID(), SelectComboBox.getAreaID(), SelectComboBox.getDragoConnexID(), SelectComboBox.getFloorNumber());
+
+            if (allRoom != null && allRoom.next()) {
+                do {
+                    String status = "";
+                    String status_warning = "";
+                    String status_perday = "";
+                    float perDay = 0;
+                    float wFl = 0;
+                    boolean found = false;
+                    boolean found2 = false;
+
+                    while (rs_current.next()) {
+                        if (allRoom.getString("roomnumber").equals(rs_current.getString("roomNumber"))) {
+                            wFl = Float.valueOf(rs_current.getString("wFl"));
+                            float w_high_treshold = Float.valueOf(rs_current.getString("w_high_treshold"));
+                            float w_low_treshold = Float.valueOf(rs_current.getString("w_low_treshold"));
+                            if (wFl > w_high_treshold) {
+                                status_warning = "Warning : Over";
+                            }
+                            if ((wFl < w_low_treshold && wFl > 0)) {
+                                status_warning = "Warning : Leak";
+                            }
+
+                            found = true;
+                            break;
+                        }
+                    }
+                    if (!found) {
+                        status_warning = "Warning : Disconnect";
+                    } else {
+                        // calculate perDay
+                        while (rs_start.next()) {
+                            perDay = 0;
+                            if (allRoom.getString("roomnumber").equals(rs_start.getString("roomNumber"))) {
+                                perDay = Float.valueOf(rs_current.getString("wFw")) - Float.valueOf(rs_start.getString("wFw"));
+                                Float w_max_perDay = Float.valueOf(allRoom.getString("w_max_per_day"));
+                                if (perDay > w_max_perDay) {
+                                    status_perday = "Warning : Over perDay";
+                                }
+                                found2 = true;
+                                break;
+                            }
+                        }
+                    }
+                    if (status_warning.equals("") && status_perday.equals("")) {
+                        status = "Normal";
+                    } else {
+                        String comma = "";
+                        if (!status_warning.equals("") && !status_perday.equals("")) {
+                            comma = ", ";
+                        }
+                        status = status_warning + comma + status_perday;
+                    }
+
+                    Object[] obj = {status, (allRoom.getString("roomNumber")).replaceFirst("^0+(?!$)", ""), allRoom.getString("floor"), wFl, String.format("%.3f", perDay)};
+                    model.addRow(obj);
+
+                } while (allRoom.next());
             }
 
         } catch (SQLException ex) {
@@ -174,8 +263,8 @@ public class ViewTable extends javax.swing.JPanel implements ActionListener{
         this.setTable(model);
 //        table.setRowSorter(sorter);
 //        table.setModel(model);
-        this.dateTime.setText(startDateTime.get("dateTimeLocal"));
-        System.out.println(startDateTime.get("dateTimeLocal"));
+        this.dateTime.setText(currentDateTime.get("dateTimeLocal"));
+//        System.out.println(currentDateTime.get("dateTimeLocal"));
 
         dbR.close();
         dbD.close();
@@ -207,7 +296,7 @@ public class ViewTable extends javax.swing.JPanel implements ActionListener{
                         "Water Vs Time",
                         "WATER",
                         table.getModel().getValueAt(rowindex, 2).toString(),
-                        startDateTime.get("dateTimeLocal"));
+                        currentDateTime.get("dateTimeLocal"));
 
                 chart.pack();
                 RefineryUtilities.centerFrameOnScreen(chart);
@@ -222,12 +311,14 @@ public class ViewTable extends javax.swing.JPanel implements ActionListener{
     @Override
     public void actionPerformed(ActionEvent e) {
         if (e.getSource() == updateButton) {
+            //System.out.println(SelectComboBox.getSiteID()+" "+SelectComboBox.getAreaID()+" "+ SelectComboBox.getDragoConnexID()+" "+SelectComboBox.getFloorNumber());
             loadData();
         } else if (e.getSource() == areaCombo) {
             DBDragoConnex dbDrago = new DBDragoConnex();
             dbDrago.connect();
             ResultSet rs = dbDrago.selectDragoConnexByAreaID(SelectComboBox.getAreaID());
             DefaultComboBoxModel<DragoConnex> dragoConnexModel = new DefaultComboBoxModel<DragoConnex>();
+            DefaultComboBoxModel<Floor> floorModel = new DefaultComboBoxModel<Floor>();
             try {
                 if (rs != null && rs.next()) {
                     dragoConnexModel.addElement(new DragoConnex(null, "Select All"));
@@ -236,28 +327,29 @@ public class ViewTable extends javax.swing.JPanel implements ActionListener{
                     } while (rs.next());
 
                 } else {
-                    dragoConnexModel.addElement(new DragoConnex(null, "-----"));
+                    dragoConnexModel.addElement(new DragoConnex("-1", "-----"));
+                    floorModel.addElement(new Floor("-1", "-----"));
+                    this.setFloorCombo(floorModel);
                 }
-               this.setDragoConnexCombo(dragoConnexModel);
-              
+                this.setDragoConnexCombo(dragoConnexModel);
 
             } catch (SQLException ex) {
                 Logger.getLogger(AreaCombo.class.getName()).log(Level.SEVERE, null, ex);
             }
 
-        }else if(e.getSource() == dragoConnexCombo){
+        } else if (e.getSource() == dragoConnexCombo) {
             DBRoom dbR = new DBRoom();
             dbR.connect();
             DefaultComboBoxModel<Floor> floorModel = new DefaultComboBoxModel<Floor>();
             ResultSet rs = dbR.selectFloorBydragoConnexID(SelectComboBox.getDragoConnexID());
             try {
-                if(rs!=null && rs.next()){
+                if (rs != null && rs.next()) {
                     floorModel.addElement(new Floor(null, "Select All"));
-                    do{
+                    do {
                         floorModel.addElement(new Floor(rs.getString("floor"), rs.getString("floor")));
-                    }while(rs.next());
-                }else{
-                    floorModel.addElement(new Floor(null, "-----"));
+                    } while (rs.next());
+                } else {
+                    floorModel.addElement(new Floor("-1", "-----"));
                 }
             } catch (SQLException ex) {
                 Logger.getLogger(ViewTable.class.getName()).log(Level.SEVERE, null, ex);
@@ -267,5 +359,3 @@ public class ViewTable extends javax.swing.JPanel implements ActionListener{
     }
 
 }
-
-

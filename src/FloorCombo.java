@@ -42,7 +42,7 @@ public class FloorCombo extends JComboBox {
                 } while (rs.next());
             }
             else{
-                floorModel.addElement(new Floor(null,"-----"));
+                floorModel.addElement(new Floor("-1","-----"));
             }
                 
 

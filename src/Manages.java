@@ -59,30 +59,33 @@ public class Manages extends JPanel implements MouseListener {
     JPanel roomManage;
     JLabel dataSetupText;
     JLabel siteManageText;
-
+    ManageTab manageTab;
     public Manages() {
         initComponents();
         this.setOpaque(false);
         this.setLayout(new FlowLayout(FlowLayout.LEFT, 3, 3));
-        dataSetup = new SubMenuSetting("Get A New DataSet");
-        dataSetup.addMouseListener(this);
-        siteManage = new SubMenuSetting("Site Management");
-        siteManage.addMouseListener(this);
-
-        areaManage = new SubMenuSetting("Area Management");
-        areaManage.addMouseListener(this);
-
-        dragoConnexManage = new SubMenuSetting("DragoConnex Management");
-        dragoConnexManage.addMouseListener(this);
-
-        roomManage = new SubMenuSetting("Room Management");
-        roomManage.addMouseListener(this);
-
-        add(dataSetup);
-        add(siteManage);
-        add(areaManage);
-        add(dragoConnexManage);
-        add(roomManage);
+        manageTab = new ManageTab();
+        add(manageTab);
+        
+//        dataSetup = new SubMenuSetting("Get A New DataSet");
+//        dataSetup.addMouseListener(this);
+//        siteManage = new SubMenuSetting("Site Management");
+//        siteManage.addMouseListener(this);
+//
+//        areaManage = new SubMenuSetting("Area Management");
+//        areaManage.addMouseListener(this);
+//
+//        dragoConnexManage = new SubMenuSetting("DragoConnex Management");
+//        dragoConnexManage.addMouseListener(this);
+//
+//        roomManage = new SubMenuSetting("Room Management");
+//        roomManage.addMouseListener(this);
+//
+//        add(dataSetup);
+//        add(siteManage);
+//        add(areaManage);
+//        add(dragoConnexManage);
+//        add(roomManage);
 
     }
 
@@ -203,7 +206,7 @@ public class Manages extends JPanel implements MouseListener {
                 dbD.connect();
                 for (int i = 0; i < obj.getJSONArray("meters").length(); i++) {
                     JSONObject roomNumber = new JSONObject((obj.getJSONArray("meters")).getJSONObject(i).get("meterSetting").toString());
-                    dbR.insertRoom((obj.getJSONArray("meters")).getJSONObject(i).get("mBusID").toString(), (obj.getJSONArray("meters")).getJSONObject(i).get("dragoConnexID").toString(), roomNumber.get("RoomNumber").toString(), roomNumber.get("HighTreshold").toString());
+                    dbR.insertRoom((obj.getJSONArray("meters")).getJSONObject(i).get("mBusID").toString(), (obj.getJSONArray("meters")).getJSONObject(i).get("dragoConnexID").toString(), roomNumber.get("RoomNumber").toString(), roomNumber.get("HighTreshold").toString(),roomNumber.get("LowTreshold").toString());
                     
                 }
                 db.connect();
