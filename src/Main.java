@@ -184,6 +184,8 @@ public class Main extends javax.swing.JFrame {
                     try {
 
                         getRoomDetailFromServer();
+//                        Sanwa sw = new Sanwa();
+//                        sw.getStartDateTime();
                         sc.state = true;
                         sc.notifyAll();
 
@@ -309,7 +311,8 @@ public class Main extends javax.swing.JFrame {
         dateTime = startDateTime.get("dateTimeLocal").toString();
 
 //        try {
-        url = new URL("http://dragoservices.azurewebsites.net/api/DragoServices/MeterRecord?s=" + "2017-04-03T00:00:00" + "%2B0700");
+        String date = dateTime.substring(0, 10);
+        url = new URL("http://dragoservices.azurewebsites.net/api/DragoServices/MeterRecord?s=" + date+"T00:00:00" + "%2B0700");
         in = new BufferedReader(new InputStreamReader(url.openStream()));
         String line = in.readLine();
         if (!"[]".equals(line)) {

@@ -129,7 +129,7 @@ public class DBDetail extends Database {
 
     public ResultSet selectAllWaterByDateTimeSiteIDAreaIDDragoConnexIDFloor(String dateTime, String siteID, String areaID, String dragoConnexID, String floor) {
         String date = dateTime.substring(0, 10);
-        date = "2017-04-02";
+        
         String time = dateTime.substring(11);
         String sql = "SELECT e.wFl,e.wFw, d.roomNumber, d.w_mBusID, d.w_high_treshold, d.w_low_treshold, d.floor, c.description AS dragoConnexName, a.description AS areaName, b.description AS siteName\n"
                 + "FROM ((((sites AS a INNER JOIN  areas AS b ON a.siteID = b.siteID) INNER JOIN dragoConnexes AS c ON b.areaID = c.areaID) INNER JOIN room AS d ON c.dragoConnexID = d.dragoConnexID) LEFT JOIN detail_room_w AS e ON d.room_ID = e.room_ID)"
