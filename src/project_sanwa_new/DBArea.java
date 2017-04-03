@@ -99,5 +99,44 @@ public class DBArea extends Database {
         }
         return rs;
     }
+    public ResultSet selectAllArea() {
+        ResultSet rs = null;
+        String sql = "SELECT b.areaID, b.description AS areaName, a.description AS siteName FROM sites AS a INNER JOIN areas AS b ON a.siteID = b.siteID ";
+
+        try {
+            s = connect.createStatement();
+            rs = s.executeQuery(sql);
+            if (s != null) {
+                try {
+                    s.close();
+                } catch (SQLException ex) {
+                    Logger.getLogger(Database.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+
+        } catch (SQLException ex) {
+            Logger.getLogger(Database.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return rs;
+    }
+    public int updateArea(String areaID, String description) {
+        int rs = 0;
+        String sql = "UPDATE areas a SET a.description = '"+description+"' WHERE areaID = '"+areaID+"' ";
+        try {
+            s = connect.createStatement();
+            rs = s.executeUpdate(sql);
+            if (s != null) {
+                try {
+                    s.close();
+                } catch (SQLException ex) {
+                    Logger.getLogger(Database.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+        } catch (SQLException ex) {
+            Logger.getLogger(DBSites.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
+        return rs;
+    }
 
 }

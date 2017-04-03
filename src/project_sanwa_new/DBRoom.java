@@ -287,7 +287,7 @@ public class DBRoom extends Database {
     }
 
     public ResultSet selectAllRoomDragoConnex() {
-        String sql = "SELECT a.room_ID, a.roomNumber, a.w_mBusID, a.w_high_treshold, a.w_low_treshold, a.w_max_per_day,a.floor, b.description FROM room a INNER JOIN dragoConnexes b ON a.dragoConnexID = b.dragoConnexID ORDER BY b.description, a.roomNumber";
+        String sql = "SELECT a.room_ID, a.roomNumber, a.w_mBusID, a.w_high_treshold, a.w_low_treshold, a.w_max_per_day,a.floor,a.warning_to_alert, b.description FROM room a INNER JOIN dragoConnexes b ON a.dragoConnexID = b.dragoConnexID ORDER BY b.description, a.roomNumber";
 
         ResultSet rs = null;
 
@@ -388,6 +388,25 @@ public class DBRoom extends Database {
     public int updateMaxPerDay(String roomID, String maxPerDay) {
         int rs = 0;
         String sql = "UPDATE room a SET a.w_max_per_day = '" + maxPerDay + "' WHERE room_ID = '" + roomID + "' ";
+        try {
+            s = connect.createStatement();
+            rs = s.executeUpdate(sql);
+            if (s != null) {
+                try {
+                    s.close();
+                } catch (SQLException ex) {
+                    Logger.getLogger(Database.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+        } catch (SQLException ex) {
+            Logger.getLogger(DBSites.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
+        return rs;
+    }
+     public int updateWarningToAlert(String roomID, int warningToAlert) {
+        int rs = 0;
+        String sql = "UPDATE room a SET a.warning_to_alert = '" + warningToAlert + "' WHERE room_ID = '" + roomID + "' ";
         try {
             s = connect.createStatement();
             rs = s.executeUpdate(sql);

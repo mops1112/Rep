@@ -13,9 +13,8 @@ import java.net.URL;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.DateFormat;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -25,7 +24,6 @@ import java.util.Map;
 import java.util.TimeZone;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.swing.JProgressBar;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -141,6 +139,33 @@ public class Sanwa {
             }
         }
         dbB.connect.close();
+    }
+
+    public String[] getDateTime(int minus) {
+
+        String[] dateTime = new String[minus+1];
+
+        try {
+            Date myDate = new Date();
+            SimpleDateFormat sdff = new SimpleDateFormat("yyyy/MM/dd HH:mm:00");
+           // Date d = (Date) sdff.parse("2560/04/02 11:45:00");
+            Date d = (Date) sdff.parse(sdff.format(myDate));
+            long millisec = d.getTime();
+            for (int i = 0; i <= minus; i++) {
+                Date date = new Date(millisec - (900000 * i));
+                //Date date = new Date(System.currentTimeMillis() - (900000 * minus));
+                SimpleDateFormat timeFormat = new SimpleDateFormat("mm");
+                String minute = timeFormat.format(date);
+                minute = String.format("%02d", (Integer.parseInt(minute) / 15) * 15);
+                timeFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:" + minute + ":00", Locale.ENGLISH);
+                dateTime[i] = timeFormat.format(date);
+            }
+
+        } catch (ParseException ex) {
+            Logger.getLogger(Sanwa.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
+        return dateTime;
     }
 
     public Map getCurentDateTime() {

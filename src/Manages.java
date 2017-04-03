@@ -1,12 +1,6 @@
 
-import java.awt.BorderLayout;
-import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
-import java.awt.Font;
-import java.awt.Insets;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.io.BufferedReader;
@@ -17,19 +11,10 @@ import java.net.URL;
 import java.sql.SQLException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javafx.embed.swing.JFXPanel;
-import javax.swing.ImageIcon;
-import javax.swing.JButton;
-import javax.swing.JDialog;
-import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JTable;
-import javax.swing.JTextArea;
-import org.json.JSONArray;
 import org.json.JSONObject;
 import project_sanwa_new.DBArea;
 import project_sanwa_new.DBDetail;
@@ -60,13 +45,14 @@ public class Manages extends JPanel implements MouseListener {
     JLabel dataSetupText;
     JLabel siteManageText;
     ManageTab manageTab;
+
     public Manages() {
         initComponents();
         this.setOpaque(false);
         this.setLayout(new FlowLayout(FlowLayout.LEFT, 3, 3));
         manageTab = new ManageTab();
         add(manageTab);
-        
+
 //        dataSetup = new SubMenuSetting("Get A New DataSet");
 //        dataSetup.addMouseListener(this);
 //        siteManage = new SubMenuSetting("Site Management");
@@ -86,7 +72,6 @@ public class Manages extends JPanel implements MouseListener {
 //        add(areaManage);
 //        add(dragoConnexManage);
 //        add(roomManage);
-
     }
 
     /**
@@ -137,6 +122,15 @@ public class Manages extends JPanel implements MouseListener {
             edit.pack();
             edit.setLocationRelativeTo(null);
             edit.setVisible(true);
+        } else if (e.getSource() == areaManage) {
+            JFrame edit = new JFrame();
+            edit.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+            edit.setPreferredSize(new Dimension(900, 600));
+            RoomManagement roomManagement = new RoomManagement();
+            edit.add(roomManagement);
+            edit.pack();
+            edit.setLocationRelativeTo(null);
+            edit.setVisible(true);
         }
     }
 
@@ -156,7 +150,6 @@ public class Manages extends JPanel implements MouseListener {
 //        dialog.setLocationRelativeTo(null);
 //        dialog.pack();
 //        dialog.setVisible(true);
-        
 
 //        JDialog dialogWait = new JDialog();
 //        dialogWait.setContentPane(optionPane);
@@ -172,12 +165,11 @@ public class Manages extends JPanel implements MouseListener {
         DBRoom dbR = new DBRoom();
         DBDetail dbD = new DBDetail();
 
-        
         dbS.connect();
         dbA.connect();
         dbDC.connect();
         dbR.connect();
-        
+
         URL url;
         BufferedReader in;
         JSONObject obj = null;
@@ -206,16 +198,16 @@ public class Manages extends JPanel implements MouseListener {
                 dbD.connect();
                 for (int i = 0; i < obj.getJSONArray("meters").length(); i++) {
                     JSONObject roomNumber = new JSONObject((obj.getJSONArray("meters")).getJSONObject(i).get("meterSetting").toString());
-                    dbR.insertRoom((obj.getJSONArray("meters")).getJSONObject(i).get("mBusID").toString(), (obj.getJSONArray("meters")).getJSONObject(i).get("dragoConnexID").toString(), roomNumber.get("RoomNumber").toString(), roomNumber.get("HighTreshold").toString(),roomNumber.get("LowTreshold").toString());
-                    
+                    dbR.insertRoom((obj.getJSONArray("meters")).getJSONObject(i).get("mBusID").toString(), (obj.getJSONArray("meters")).getJSONObject(i).get("dragoConnexID").toString(), roomNumber.get("RoomNumber").toString(), roomNumber.get("HighTreshold").toString(), roomNumber.get("LowTreshold").toString());
+
                 }
                 db.connect();
                 db.setStatusStartProgram("1");
                 db.close();
-                
+
                 dbR.close();
                 dbD.close();
-                
+
             }
         } catch (MalformedURLException ex) {
             rs = false;

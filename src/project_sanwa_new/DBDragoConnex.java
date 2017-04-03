@@ -75,5 +75,71 @@ public class DBDragoConnex extends Database {
         }
         return rs;
     }
-    
+       public int selectTimeAlertByDragoConnexID(String dragoConnexID) {
+        int time_alert = 0;
+        ResultSet rs = null;
+        String sql = "SELECT a.time_alert FROM dragoConnexes a";
+        String where = " ";
+        if (dragoConnexID != null) {
+            where = where + "WHERE a.dragoConnexID = '" + dragoConnexID + "'";
+        }
+        sql = sql + where;
+        try {
+            s = connect.createStatement();
+            rs = s.executeQuery(sql);
+            if (s != null) {
+                try {
+                    s.close();
+                } catch (SQLException ex) {
+                    Logger.getLogger(Database.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+            if(rs!=null && rs.next()){
+            time_alert = rs.getInt("time_alert");
+            }
+
+        } catch (SQLException ex) {
+            Logger.getLogger(Database.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return time_alert;
+    }
+    public ResultSet selectAllDragoConnex() {
+        ResultSet rs = null;
+        String sql = "SELECT c.dragoConnexID, c.time_alert, c.description AS dragoConnexName, a.description AS siteName, b.description AS  areaName FROM (sites AS a INNER JOIN areas AS b ON a.siteID = b.siteID) INNER JOIN dragoConnexes AS c ON b.areaID = c.areaID";
+
+        try {
+            s = connect.createStatement();
+            rs = s.executeQuery(sql);
+            if (s != null) {
+                try {
+                    s.close();
+                } catch (SQLException ex) {
+                    Logger.getLogger(Database.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+
+        } catch (SQLException ex) {
+            Logger.getLogger(Database.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return rs;
+    }
+    public int updateDragoConnex(String dragoConnexID, int time_alert) {
+        int rs = 0;
+        String sql = "UPDATE dragoConnexes a SET a.time_alert = '"+time_alert+"' WHERE dragoConnexID = '"+dragoConnexID+"' ";
+        try {
+            s = connect.createStatement();
+            rs = s.executeUpdate(sql);
+            if (s != null) {
+                try {
+                    s.close();
+                } catch (SQLException ex) {
+                    Logger.getLogger(Database.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+        } catch (SQLException ex) {
+            Logger.getLogger(DBSites.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
+        return rs;
+    }
 }

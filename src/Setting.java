@@ -1,20 +1,126 @@
+
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.Dimension;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.swing.BoxLayout;
+import javax.swing.JButton;
+import javax.swing.JComboBox;
+import javax.swing.JMenuItem;
+import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
+import javax.swing.JScrollPane;
+import javax.swing.JTable;
+import javax.swing.JTextField;
+import javax.swing.SwingUtilities;
+import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableCellRenderer;
+import project_sanwa_new.DBDragoConnex;
+import project_sanwa_new.DBRoom;
+
 /*
  * To change this license header, choose License Headers in Project Properties.
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-
 /**
  *
  * @author yotsathon
  */
-public class Setting extends javax.swing.JPanel {
+public class Setting extends javax.swing.JPanel implements MouseListener, ActionListener {
 
     /**
      * Creates new form Setting
      */
+    JTable table;
+    JComboBox timeToAlertCombo;
+    JButton saveButton;
+    JButton updateButton;
+    JPanel edit;
+    JPanel showTable;
+    DBRoom dbR;
+    DefaultTableModel model;
+
+    int rowTable;
+    int[] multiRows;
+    JPopupMenu popupMenu;
+    JMenuItem menuItemSetTimeToAlert;
+
     public Setting() {
         initComponents();
+
+        table = new JTable() {
+            @Override
+            public Component prepareRenderer(TableCellRenderer renderer, int rowIndex, int vColIndex) {
+                Component c = super.prepareRenderer(renderer, rowIndex, vColIndex);
+                if (rowIndex % 2 == 0 && !isCellSelected(rowIndex, vColIndex)) {
+                    c.setBackground(new Color(243, 242, 243));
+                } else if (isCellSelected(rowIndex, vColIndex)) {
+                    c.setBackground(new Color(174, 209, 241));
+                    c.setForeground(new Color(0, 0, 0));
+                } else {
+                    //c.setBackground(getBackground());
+                    c.setBackground(new Color(255, 255, 255));
+                }
+                return c;
+            }
+
+        };
+        table.setPreferredScrollableViewportSize(new Dimension(650, 400));
+        table.setFillsViewportHeight(true);
+        table.addMouseListener(this);
+        JScrollPane scrollPane = new JScrollPane(table);
+        String[] time = {"00:15", "00:30", "00:45", "01:00", "01:15"};
+        timeToAlertCombo = new JComboBox(time);
+        //timeToAlertCombo.setPreferredSize(new Dimension(100, 200));
+        timeToAlertCombo.setMaximumSize(new Dimension(500, 25));
+        saveButton = new JButton("Save");
+        saveButton.setEnabled(false);
+        saveButton.addMouseListener(this);
+        updateButton = new JButton("Update");
+        updateButton.addMouseListener(this);
+//
+        edit = new JPanel();
+        edit.setLayout(new BoxLayout(edit, BoxLayout.Y_AXIS));
+        edit.add(timeToAlertCombo);
+        edit.add(saveButton);
+
+        getDataToTable();
+        showTable = new JPanel(new BorderLayout());
+        showTable.add(updateButton, BorderLayout.NORTH);
+        showTable.add(scrollPane, BorderLayout.CENTER);
+        
+        add(showTable, BorderLayout.LINE_START);
+        add(edit, BorderLayout.CENTER);
+
+    }
+
+    private void getDataToTable() {
+
+        String columnNames[] = {"roomID", "DragoConnex", "Room Number", "warning to alert (minute)"};
+        model = new DefaultTableModel(new Object[0][0], columnNames);
+        dbR = new DBRoom();
+        dbR.connect();
+        ResultSet rs = dbR.selectAllRoomDragoConnex();
+        try {
+            while (rs.next()) {
+                Object[] obj = {rs.getString("room_ID"),rs.getString("description"), (rs.getString("roomNumber")).replaceFirst("^0+(?!$)", ""), rs.getInt("warning_to_alert")*15};
+                model.addRow(obj);
+            }
+            table.setModel(model);
+            table.removeColumn(table.getColumnModel().getColumn(0));
+        } catch (SQLException ex) {
+            Logger.getLogger(SiteManagement.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
 
     /**
@@ -26,17 +132,76 @@ public class Setting extends javax.swing.JPanel {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
-        this.setLayout(layout);
-        layout.setHorizontalGroup(
-            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 400, Short.MAX_VALUE)
-        );
-        layout.setVerticalGroup(
-            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 300, Short.MAX_VALUE)
-        );
+        setLayout(new java.awt.BorderLayout());
     }// </editor-fold>//GEN-END:initComponents
+
+    @Override
+    public void mouseClicked(MouseEvent e) {
+        if (e.getSource() == table) {
+            if (SwingUtilities.isLeftMouseButton(e)) {
+                saveButton.setEnabled(true);
+                rowTable = table.rowAtPoint(e.getPoint());
+                timeToAlertCombo.setSelectedIndex(0);
+            } else {
+                
+                
+                popupMenu = new JPopupMenu();
+                menuItemSetTimeToAlert = new JMenuItem("Set Warning to Alert");
+                menuItemSetTimeToAlert.addActionListener(this);
+                popupMenu.add(menuItemSetTimeToAlert);
+                popupMenu.show(e.getComponent(), e.getX(), e.getY());
+                
+                
+
+            }
+        }else if (e.getSource() == saveButton) {
+            int rs = dbR.updateWarningToAlert(model.getValueAt(rowTable, 0).toString(),timeToAlertCombo.getSelectedIndex()+1);
+            if (rs != 0) {
+                getDataToTable();
+                timeToAlertCombo.setSelectedIndex(0);
+                saveButton.setEnabled(false);
+            }
+        } else if (e.getSource() == updateButton) {
+            getDataToTable();
+        }
+    }
+
+    @Override
+    public void mousePressed(MouseEvent e) {
+
+    }
+
+    @Override
+    public void mouseReleased(MouseEvent e) {
+
+    }
+
+    @Override
+    public void mouseEntered(MouseEvent e) {
+
+    }
+
+    @Override
+    public void mouseExited(MouseEvent e) {
+
+    }
+
+    @Override
+    public void actionPerformed(ActionEvent e) {
+        multiRows = table.getSelectedRows();
+        if (e.getSource() == menuItemSetTimeToAlert) {
+          
+            ArrayList updateTimeToAlert = new ArrayList();
+            for (int i = 0; i < multiRows.length; i++) {
+                updateTimeToAlert.add(model.getValueAt(multiRows[i], 0));
+            }
+            DialogSetWarningToAlert dialogSetWarningToAlert = new DialogSetWarningToAlert(updateTimeToAlert);
+            dialogSetWarningToAlert.setPreferredSize(new Dimension(200, 100));
+            dialogSetWarningToAlert.setLocationRelativeTo(null);
+            dialogSetWarningToAlert.setVisible(true);
+
+        }
+    }
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables

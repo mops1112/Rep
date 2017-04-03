@@ -55,7 +55,7 @@ import project_sanwa_new.SelectComboBox;
  *
  * @author yotsathon
  */
-public class ViewTable extends javax.swing.JPanel implements ActionListener {
+public class ViewTable_backup extends javax.swing.JPanel implements ActionListener {
 
     /**
      * Creates new form ViewTable
@@ -90,7 +90,7 @@ public class ViewTable extends javax.swing.JPanel implements ActionListener {
         this.dragoConnexCombo.setModel(dragoConnexModel);
     }
 
-    public ViewTable() {
+    public ViewTable_backup() {
         initComponents();
         this.setOpaque(false);
         dateTime = new JLabel("DateTime :");
@@ -114,7 +114,7 @@ public class ViewTable extends javax.swing.JPanel implements ActionListener {
                 }
                 String highlight = table.getValueAt(rowIndex, 0).toString();
                 if (!highlight.equals("Normal")) {
-                    if (countToAlert.get(rowIndex).getDisconnect() > countToAlert.get(rowIndex).getTime() || countToAlert.get(rowIndex).getLeak() > countToAlert.get(rowIndex).getTime() || countToAlert.get(rowIndex).getOver() > countToAlert.get(rowIndex).getTime() || countToAlert.get(rowIndex).getPerDay() > countToAlert.get(rowIndex).getTime()) {
+                    if (countToAlert.get(rowIndex).getDisconnect() > rangeAlert || countToAlert.get(rowIndex).getLeak() > rangeAlert || countToAlert.get(rowIndex).getOver() > rangeAlert || countToAlert.get(rowIndex).getPerDay() > rangeAlert) {
                         c.setBackground(new Color(244, 196, 55));
                     }
 
@@ -204,98 +204,97 @@ public class ViewTable extends javax.swing.JPanel implements ActionListener {
         currentDateTime = sw.getCurentDateTime();
         //2017-04-02T11:45:00
         midNightDateTime = sw.getStartDateTime();
-       // String[] dateTime = sw.getDateTime(rangeAlert);
+        String[] dateTime = sw.getDateTime(rangeAlert);
         try {
 
-            ResultSet allRoom = dbD.selectAllWaterBySiteIDAreaIDDragoConnexIDFloor(SelectComboBox.getSiteID(), SelectComboBox.getAreaID(), SelectComboBox.getDragoConnexID(), SelectComboBox.getFloorNumber());
+            ResultSet allRoom1 = dbD.selectAllWaterBySiteIDAreaIDDragoConnexIDFloor(SelectComboBox.getSiteID(), SelectComboBox.getAreaID(), SelectComboBox.getDragoConnexID(), SelectComboBox.getFloorNumber());
             countToAlert = new ArrayList<CountToAlert>();
-            int i = 0;
-            while (allRoom.next()) {
-                countToAlert.add(new CountToAlert(allRoom.getString("roomNumber"), 0, 0, 0, 0, allRoom.getInt("warning_to_alert")));
+            while (allRoom1.next()) {
+                countToAlert.add(new CountToAlert(allRoom1.getString("roomNumber"), 0, 0, 0, 0, allRoom1.getInt("warning_to_alert")));
                 
-                String[] dateTime = sw.getDateTime( countToAlert.get(i).getTime());
+                
+                
+            }
+
+            for (int c = 0; c <= rangeAlert; c++) {
+
+                ResultSet allRoom = dbD.selectAllWaterBySiteIDAreaIDDragoConnexIDFloor(SelectComboBox.getSiteID(), SelectComboBox.getAreaID(), SelectComboBox.getDragoConnexID(), SelectComboBox.getFloorNumber());
+                ResultSet rs_current = dbD.selectAllWaterByDateTimeSiteIDAreaIDDragoConnexIDFloor(dateTime[c], SelectComboBox.getSiteID(), SelectComboBox.getAreaID(), SelectComboBox.getDragoConnexID(), SelectComboBox.getFloorNumber());
                 ResultSet rs_midNight = dbD.selectAllWaterByDateTimeSiteIDAreaIDDragoConnexIDFloor(midNightDateTime.get("dateTimeLocal"), SelectComboBox.getSiteID(), SelectComboBox.getAreaID(), SelectComboBox.getDragoConnexID(), SelectComboBox.getFloorNumber());
-               // int j = countToAlert.get(i).getTime();
-                for (int c = 0; c <= countToAlert.get(i).getTime(); c++) {
+                int i = 0;
+                if (allRoom != null && allRoom.next()) {
+                    do {
 
-                    //ResultSet allRoom = dbD.selectAllWaterBySiteIDAreaIDDragoConnexIDFloor(SelectComboBox.getSiteID(), SelectComboBox.getAreaID(), SelectComboBox.getDragoConnexID(), SelectComboBox.getFloorNumber());
-                    ResultSet rs_current = dbD.selectAllWaterByDateTimeSiteIDAreaIDDragoConnexIDFloor(dateTime[c], SelectComboBox.getSiteID(), SelectComboBox.getAreaID(), SelectComboBox.getDragoConnexID(), SelectComboBox.getFloorNumber());
-                    
+                        String status = "";
+                        String status_warning = "";
+                        String status_perday = "";
+                        float perDay = 0;
+                        float wFl = 0;
+                        boolean found = false;
+                        boolean found2 = false;
+                        System.out.println(allRoom.getString("roomNumber"));
+                       
+                        while (rs_current.next()) {
 
-                    
-                        //do {
+                            if (allRoom.getString("roomNumber").equals(rs_current.getString("roomNumber"))) {
+                                wFl = Float.valueOf(rs_current.getString("wFl"));
+                                float w_high_treshold = Float.valueOf(rs_current.getString("w_high_treshold"));
+                                float w_low_treshold = Float.valueOf(rs_current.getString("w_low_treshold"));
+                                if (wFl > w_high_treshold) {
+                                    status_warning = "Warning : Over";
+                                    countToAlert.get(i).setOver();
+                                }
+                                if ((wFl < w_low_treshold && wFl > 0)) {
+                                    status_warning = "Warning : Leak";
+                                    countToAlert.get(i).setLeak();
+                                }
 
-                            String status = "";
-                            String status_warning = "";
-                            String status_perday = "";
-                            float perDay = 0;
-                            float wFl = 0;
-                            boolean found = false;
-                            boolean found2 = false;
-                            System.out.println(allRoom.getString("roomNumber"));
+                                found = true;
+                                break;
+                            }
+                        }
+                        if (!found) {
+                            status_warning = "Warning : Disconnect";
+                            countToAlert.get(i).setDisconnect();
+                            rs_current.beforeFirst();
 
-                            while (rs_current.next()) {
-
-                                if (allRoom.getString("roomNumber").equals(rs_current.getString("roomNumber"))) {
-                                    wFl = Float.valueOf(rs_current.getString("wFl"));
-                                    float w_high_treshold = Float.valueOf(rs_current.getString("w_high_treshold"));
-                                    float w_low_treshold = Float.valueOf(rs_current.getString("w_low_treshold"));
-                                    if (wFl > w_high_treshold) {
-                                        status_warning = "Warning : Over";
-                                        countToAlert.get(i).setOver();
+                        } else {
+                            // calculate perDay
+                            while (rs_midNight.next()) {
+                                perDay = 0;
+                                if (allRoom.getString("roomNumber").equals(rs_midNight.getString("roomNumber"))) {
+                                    perDay = Float.valueOf(rs_current.getString("wFw")) - Float.valueOf(rs_midNight.getString("wFw"));
+                                    Float w_max_perDay = Float.valueOf(allRoom.getString("w_max_per_day"));
+                                    if (perDay > w_max_perDay) {
+                                        status_perday = "Warning : Over perDay";
+                                        countToAlert.get(i).setPerDay();
                                     }
-                                    if ((wFl < w_low_treshold && wFl > 0)) {
-                                        status_warning = "Warning : Leak";
-                                        countToAlert.get(i).setLeak();
-                                    }
-
-                                    found = true;
+                                    found2 = true;
                                     break;
                                 }
                             }
-                            if (!found) {
-                                status_warning = "Warning : Disconnect";
-                                countToAlert.get(i).setDisconnect();
-                                rs_current.beforeFirst();
-
-                            } else {
-                                // calculate perDay
-                                while (rs_midNight.next()) {
-                                    perDay = 0;
-                                    if (allRoom.getString("roomNumber").equals(rs_midNight.getString("roomNumber"))) {
-                                        perDay = Float.valueOf(rs_current.getString("wFw")) - Float.valueOf(rs_midNight.getString("wFw"));
-                                        Float w_max_perDay = Float.valueOf(allRoom.getString("w_max_per_day"));
-                                        if (perDay > w_max_perDay) {
-                                            status_perday = "Warning : Over perDay";
-                                            countToAlert.get(i).setPerDay();
-                                        }
-                                        found2 = true;
-                                        break;
-                                    }
-                                }
-                                if (!found2) {
-                                    rs_midNight.beforeFirst();
-                                }
+                            if(!found2){
+                                rs_midNight.beforeFirst();
                             }
+                        }
 
-                            if (status_warning.equals("") && status_perday.equals("")) {
-                                status = "Normal";
-                            } else {
-                                String comma = "";
-                                if (!status_warning.equals("") && !status_perday.equals("")) {
-                                    comma = ", ";
-                                }
-                                status = status_warning + comma + status_perday;
+                        if (status_warning.equals("") && status_perday.equals("")) {
+                            status = "Normal";
+                        } else {
+                            String comma = "";
+                            if (!status_warning.equals("") && !status_perday.equals("")) {
+                                comma = ", ";
                             }
-                            if (c == 0) {
-                                Object[] obj = {status, (allRoom.getString("roomNumber")).replaceFirst("^0+(?!$)", ""), allRoom.getString("floor"), wFl, String.format("%.3f", perDay)};
-                                model.addRow(obj);
+                            status = status_warning + comma + status_perday;
+                        }
+                        if (c == 0) {
+                            Object[] obj = {status, (allRoom.getString("roomNumber")).replaceFirst("^0+(?!$)", ""), allRoom.getString("floor"), wFl, String.format("%.3f", perDay)};
+                            model.addRow(obj);
 
-                            }
-                           
-                        //} while (allRoom.next());
-                  
-                } i++;
+                        }
+                        i++;
+                    } while (allRoom.next());
+                }
 
             }
 

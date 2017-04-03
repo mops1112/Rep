@@ -92,6 +92,7 @@ public class Main extends javax.swing.JFrame {
         viewTable = new ViewTable();
 
         manage = new Manages();
+        setting = new Setting();
         progressBar = new JProgressBar();
         progressBar.setFont(new java.awt.Font("Century Gothic", 0, 10));
         progressBar.setStringPainted(true);
@@ -107,7 +108,7 @@ public class Main extends javax.swing.JFrame {
         menuManage = new Menu("Management", "/project_sanwa_new/img/Mangement_48px_1.png", content, manage);
         menuReport = new Menu("Reporting", "/project_sanwa_new/img/Reporting_48px.png", content, report);
         menuSetting = new Menu("Setting", "/project_sanwa_new/img/Setting_48px.png", content, setting);
-        menuUpdateProgram = new Menu("Setting", "/project_sanwa_new/img/Synchronize_48px.png", content, updateProgram);
+        menuUpdateProgram = new Menu("Update", "/project_sanwa_new/img/Synchronize_48px.png", content, updateProgram);
         menuSupportUser = new Menu("Support", "/project_sanwa_new/img/Online Support_48px.png", content, supportUser);
 
         menu.add(menuManage);
@@ -256,8 +257,8 @@ public class Main extends javax.swing.JFrame {
         BufferedReader in;
         JSONArray jsonArray;
         dateTime = startDateTime.get("dateTimeLocal").toString();
-
-        url = new URL("http://dragoservices.azurewebsites.net/api/DragoServices/MeterRecord?s=" + startDateTime.get("dateTimeServer") + "%2B0700");
+        url = new URL("http://dragoservices.azurewebsites.net/api/DragoServices/MeterRecord?s=" + startDateTime.get("dateTimeLocal") + "%2B0700");
+       // url = new URL("http://dragoservices.azurewebsites.net/api/DragoServices/MeterRecord?s=" + midNightDateTime.get("dateTimeServer") + "%2B0700");
         in = new BufferedReader(new InputStreamReader(url.openStream()));
         String line = in.readLine();
         if (!"[]".equals(line)) {
@@ -308,7 +309,7 @@ public class Main extends javax.swing.JFrame {
         dateTime = startDateTime.get("dateTimeLocal").toString();
 
 //        try {
-        url = new URL("http://dragoservices.azurewebsites.net/api/DragoServices/MeterRecord?s=" + "2017-04-01T00:00:00" + "%2B0700");
+        url = new URL("http://dragoservices.azurewebsites.net/api/DragoServices/MeterRecord?s=" + "2017-04-03T00:00:00" + "%2B0700");
         in = new BufferedReader(new InputStreamReader(url.openStream()));
         String line = in.readLine();
         if (!"[]".equals(line)) {
